@@ -16,28 +16,34 @@ export default function DestinationCard({ destination, onPress, compact = false 
       onPress={onPress}
       activeOpacity={0.9}
     >
-      <Image 
-        source={{ uri: destination.images[0] }} 
-        style={[styles.image, compact && styles.compactImage]}
-      />
-      
-      {destination.category && (
-        <View style={styles.categoryTag}>
-          <Text style={styles.categoryText}>{destination.category}</Text>
-        </View>
-      )}
-      
+      <View style={styles.imageWrapper}>
+        <Image 
+          source={{ uri: destination.images[0] }} 
+          style={[styles.image, compact && styles.compactImage]}
+        />
+
+        {destination.category && (
+          <View style={styles.categoryTag}>
+            <Text style={styles.categoryText}>{destination.category}</Text>
+          </View>
+        )}
+      </View>
+
       <View style={styles.content}>
         <View style={styles.ratingContainer}>
-          <Star size={12} color="#F59E0B" />
-          <Text style={styles.rating}>{destination.rating}</Text>
+          <Star size={14} color="#F59E0B" />
+          <Text style={styles.rating}>{destination.rating.toFixed(1)}</Text>
         </View>
-        
-        <Text style={styles.title} numberOfLines={1}>{destination.name}</Text>
-        
+
+        <Text style={styles.title} numberOfLines={1}>
+          {destination.name}
+        </Text>
+
         <View style={styles.locationContainer}>
-          <MapPin size={12} color="#64748B" />
-          <Text style={styles.location} numberOfLines={1}>{destination.region}</Text>
+          <MapPin size={14} color="#64748B" />
+          <Text style={styles.location} numberOfLines={1}>
+            {destination.region}, Nepal
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -48,18 +54,21 @@ const styles = StyleSheet.create({
   card: {
     width: 200,
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
     marginRight: 12,
-    marginBottom: 4,
+    marginBottom: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 3,
   },
   compactCard: {
     width: 160,
+  },
+  imageWrapper: {
+    position: 'relative',
   },
   image: {
     width: '100%',
@@ -70,12 +79,12 @@ const styles = StyleSheet.create({
   },
   categoryTag: {
     position: 'absolute',
-    top: 8,
-    left: 8,
-    backgroundColor: 'rgba(30, 64, 175, 0.8)',
-    paddingHorizontal: 8,
+    top: 10,
+    left: 10,
+    backgroundColor: '#1E40AFCC',
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 4,
+    borderRadius: 9999,
   },
   categoryText: {
     fontFamily: 'Poppins-Medium',
@@ -84,7 +93,8 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   content: {
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -99,8 +109,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: 14,
-    color: '#1E293B',
+    fontSize: 16,
+    color: '#0F172A',
     marginBottom: 4,
   },
   locationContainer: {

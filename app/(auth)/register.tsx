@@ -1,210 +1,291 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ScrollView,
+  ActivityIndicator,
+  Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard
+} from 'react-native';
 import { router } from 'expo-router';
 import { Lock, User, Mail, ArrowLeft } from 'lucide-react-native';
 import { useAuth } from '@/context/AuthContext';
+import * as Animatable from 'react-native-animatable';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!name || !email || !password) {
       setError('Please fill in all fields');
       return;
     }
-    
+
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
     }
-    
-    // Call the signUp function from the AuthContext
-    signUp(name, email, password);
+
+    setError('');
+    setLoading(true);
+    try {
+      await signUp(name, email, password);
+    } catch (err) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color="#1E293B" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Create Account</Text>
-        <View style={{ width: 24 }} />
-      </View>
-      
-      <View style={styles.formContainer}>
-        <Image 
-          source={{ uri: 'https://images.pexels.com/photos/2845013/pexels-photo-2845013.jpeg' }}
-          style={styles.logo}
-        />
-        
-        <Text style={styles.formTitle}>Join Nepal Hidden Gems</Text>
-        <Text style={styles.formSubtitle}>Create an account to explore more</Text>
-        
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
-        
-        <View style={styles.inputContainer}>
-          <User size={20} color="#64748B" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Full Name"
-            value={name}
-            onChangeText={setName}
-          />
-        </View>
-        
-        <View style={styles.inputContainer}>
-          <Mail size={20} color="#64748B" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Email Address"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
-        
-        <View style={styles.inputContainer}>
-          <Lock size={20} color="#64748B" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-        </View>
-        
-        <Text style={styles.termsText}>
-          By signing up, you agree to our{' '}
-          <Text style={styles.termsLink}>Terms of Service</Text> and{' '}
-          <Text style={styles.termsLink}>Privacy Policy</Text>
-        </Text>
-        
-        <TouchableOpacity style={styles.button} onPress={handleRegister}>
-          <Text style={styles.buttonText}>Create Account</Text>
-        </TouchableOpacity>
-        
-        <View style={styles.loginContainer}>
-          <Text style={styles.loginText}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => router.push('/login')}>
-            <Text style={styles.loginLink}>Sign In</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'android' ? -150 : 0}
+      >
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+          <View style={styles.container}>
+            {/* Image Header */}
+            <View style={styles.imageContainer}>
+              <Image
+                source={{ uri: 'https://cdn.mos.cms.futurecdn.net/D9bzCVeZLHQnZ6bUWvAkrW-1200-80.jpg' }}
+                style={styles.backgroundImage}
+                blurRadius={Platform.OS === 'android' ? 1 : 0}
+              />
+              <View style={styles.overlay} />
+              <Animatable.View animation="fadeInUp" duration={1000} style={styles.headerTextContainer}>
+                <Text style={styles.title}>Nepal Hidden Gems</Text>
+                <Text style={styles.subtitle}>Start your exploration today</Text>
+              </Animatable.View>
+            </View>
+
+            {/* Form Container */}
+            <Animatable.View animation="fadeInUp" duration={1000} delay={300} style={styles.formContainer}>
+              <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                <ArrowLeft size={24} color="#1E293B" />
+              </TouchableOpacity>
+
+              <Text style={styles.formTitle}>Create Account</Text>
+              <Text style={styles.formSubtitle}>Join us to explore the unexplored</Text>
+
+              {error ? (
+                <Animatable.Text animation="shake" duration={500} style={styles.errorText}>
+                  {error}
+                </Animatable.Text>
+              ) : null}
+
+              {/* Full Name */}
+              <View style={styles.inputContainer}>
+                <User size={20} color="#64748B" style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Full Name"
+                  placeholderTextColor="#64748B"
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                />
+              </View>
+
+              {/* Email */}
+              <View style={styles.inputContainer}>
+                <Mail size={20} color="#64748B" style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email Address"
+                  placeholderTextColor="#64748B"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+
+              {/* Password */}
+              <View style={styles.inputContainer}>
+                <Lock size={20} color="#64748B" style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Password"
+                  placeholderTextColor="#64748B"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                />
+              </View>
+
+              {/* Terms */}
+              <Text style={styles.termsText}>
+                By signing up, you agree to our{' '}
+                <Text style={styles.termsLink}>Terms of Service</Text> and{' '}
+                <Text style={styles.termsLink}>Privacy Policy</Text>
+              </Text>
+
+              {/* Register Button */}
+              <TouchableOpacity
+                style={[styles.button, loading && styles.disabledButton]}
+                onPress={handleRegister}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#ffffff" />
+                ) : (
+                  <Text style={styles.buttonText}>Create Account</Text>
+                )}
+              </TouchableOpacity>
+
+              {/* Already have account */}
+              <View style={styles.loginContainer}>
+                <Text style={styles.loginText}>Already have an account? </Text>
+                <TouchableOpacity onPress={() => router.push('/login')}>
+                  <Text style={styles.loginLink}>Sign In</Text>
+                </TouchableOpacity>
+              </View>
+            </Animatable.View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    backgroundColor: '#ffffff',
+    flex: 1,
+    backgroundColor: '#F8FAFC',
   },
-  header: {
-    flexDirection: 'row',
+  imageContainer: {
+    height: Platform.OS === 'android' ? 280 : 300,
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 48,
-    paddingBottom: 16,
+    position: 'relative',
   },
-  backButton: {
-    padding: 8,
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject,
+    resizeMode: 'cover',
   },
-  headerTitle: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 18,
-    color: '#1E293B',
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  },
+  headerTextContainer: {
+    padding: 24,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: Platform.OS === 'android' ? 28 : 32,
+    color: '#ffffff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: Platform.OS === 'android' ? 14 : 16,
+    color: '#ffffff',
+    fontWeight: '400',
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 10,
   },
   formContainer: {
     flex: 1,
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: -24,
     padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 8,
   },
-  logo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignSelf: 'center',
-    marginBottom: 24,
+  backButton: {
+    alignSelf: 'flex-start',
+    marginBottom: 16,
+    
   },
   formTitle: {
-    fontFamily: 'Poppins-Bold',
     fontSize: 24,
+    fontWeight: 'bold',
     color: '#1E293B',
-    textAlign: 'center',
+    marginBottom: 4,
   },
   formSubtitle: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 16,
+    fontSize: 14,
     color: '#64748B',
-    textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   errorText: {
-    fontFamily: 'Poppins-Regular',
-    color: '#EF4444',
-    marginBottom: 16,
+    color: '#DC2626',
+    marginBottom: 10,
+    textAlign: 'center',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 8,
-    marginBottom: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    width: '100%',
   },
   icon: {
-    marginRight: 12,
+    marginRight: 8,
   },
   input: {
     flex: 1,
-    fontFamily: 'Poppins-Regular',
+    paddingVertical: 10,
     fontSize: 16,
     color: '#1E293B',
   },
   termsText: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 14,
+    fontSize: 12,
     color: '#64748B',
-    marginBottom: 24,
-    lineHeight: 20,
+    textAlign: 'center',
+    marginVertical: 10,
   },
   termsLink: {
-    fontFamily: 'Poppins-Medium',
-    color: '#1E40AF',
+    color: '#3B82F6',
+    textDecorationLine: 'underline',
   },
   button: {
-    backgroundColor: '#1E40AF',
-    borderRadius: 8,
-    paddingVertical: 16,
+    backgroundColor: '#3B82F6',
+    borderRadius: 10,
+    paddingVertical: 14,
     alignItems: 'center',
+    width: '100%',
+    marginVertical: 10,
+  },
+  disabledButton: {
+    backgroundColor: '#93A3B8',
   },
   buttonText: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 16,
     color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 24,
+    marginTop: 12,
   },
   loginText: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 14,
     color: '#64748B',
   },
   loginLink: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 14,
-    color: '#1E40AF',
+    color: '#3B82F6',
+    fontWeight: 'bold',
   },
 });

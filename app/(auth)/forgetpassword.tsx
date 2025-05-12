@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 export default function forgetpassword() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
-//   const { resetPassword } = useAuth();
+  const { resetPassword } = useAuth();
 
   const handleResetPassword = () => {
     if (!email) {
@@ -15,7 +15,7 @@ export default function forgetpassword() {
       return;
     }
     setError('');
-    resetPassword(email);
+    forgetpassword(email);
     Alert.alert('Password Reset', `A reset link has been sent to ${email}`);
   };
 

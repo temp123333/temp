@@ -356,6 +356,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     fontSize: 12,
     color: '#64748B',
+    width: '100%',
+    textAlign: 'center',
+    marginTop: 4,
+    
   },
   statDivider: {
     width: 1,
