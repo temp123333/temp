@@ -198,7 +198,106 @@ const destinations: Destination[] = [
     bestTimeToVisit: 'June to September, which is summer and early autumn. Unlike other parts of Nepal, this is the best time as the high passes are free of snow and accessible.',
     facilities: ['Camping', 'Basic Teahouses', 'Guided Expeditions'],
     interests: ['adventure', 'cultural', 'trekking']
-  }
+  },
+  {
+  id: 'dest009',
+  name: 'Kathmandu',
+  region: 'Central',
+  category: 'cultural',
+  description: 'Kathmandu, the capital city of Nepal, is a vibrant hub of history, culture, and spirituality. Known as the City of Temples, it is home to UNESCO World Heritage Sites such as Swayambhunath (Monkey Temple), Boudhanath Stupa, Pashupatinath Temple, and the ancient Durbar Squares. The city offers a unique blend of ancient traditions, bustling markets, and modern urban life.',
+  images: [
+        'https://images.pexels.com/photos/460621/pexels-photo-460621.jpeg',
+
+    'https://unsplash.com/photos/many-colorful-flags-are-flying-in-the-air-F4zG5aeWxAg',
+    'https://images.pexels.com/photos/159203/kathmandu-nepal-architecture-temples-159203.jpeg',
+  ],
+  coordinates: {
+    latitude: 27.7172,
+    longitude: 85.3240
+  },
+  rating: 4.7,
+  duration: '2-4 days',
+  price: '$100-300',
+  audioGuide: 'https://example.com/audio/kathmandu',
+  hasAudioGuide: true,
+  howToGetThere: 'Kathmandu is accessible by Tribhuvan International Airport, with regular flights from major cities. It is also connected via roads to various parts of Nepal and India.',
+  bestTimeToVisit: 'September to November and March to May, when the weather is pleasant and festivals like Dashain, Tihar, and Holi can be experienced.',
+  facilities: ['Hotels', 'Restaurants', 'Tour Guides', 'Transport'],
+  interests: ['cultural', 'heritage', 'religious', 'urban exploration']
+},
+  {
+    id: 'dest010',
+    name: 'Chitwan National Park',
+    region: 'Central',
+    category: 'wildlife',
+    description: 'Chitwan National Park is a UNESCO World Heritage Site and one of the best wildlife reserves in Asia. It is home to the endangered one-horned rhinoceros, Bengal tiger, and various species of birds. The park offers jungle safaris, canoe rides, and opportunities to experience the local Tharu culture.',
+    images: [
+      'https://images.pexels.com/photos/459225/pexels-photo-459225.jpeg',
+      'https://images.pexels.com/photos/45842/pexels-photo-45842.jpeg',
+      'https://images.pexels.com/photos/45843/pexels-photo-45843.jpeg'
+    ],
+    coordinates: {
+      latitude: 27.5086,
+      longitude: 84.5290
+    },
+    rating: 4.8,
+    duration: '2-3 days',
+    price: '$150-300',
+    audioGuide: 'https://example.com/audio/chitwan',
+    hasAudioGuide: true,
+    howToGetThere: 'Chitwan is accessible by road (5-6 hours from Kathmandu) or by a short flight from Kathmandu to Bharatpur.',
+    bestTimeToVisit: 'October to March for pleasant weather and good wildlife viewing opportunities.',
+    facilities: ['Jungle Lodges', 'Safari Tours', 'Cultural Programs'],
+    interests: ['wildlife', 'nature', 'adventure']
+  },
+  {
+    id: 'dest011',
+    name: 'Nagarkot',
+    region: 'Bhaktapur',
+    category: 'nature',
+    description: 'Nagarkot is a popular hill station located about 32 km east of Kathmandu. It is famous for its panoramic views of the Himalayas, especially at sunrise and sunset. The area is surrounded by lush forests and terraced fields, making it a perfect getaway for nature lovers and trekkers.',
+    images: [
+      'https://images.pexels.com/photos/210186/pexels-photo-210186.jpeg',
+      'https://images.pexels.com/photos/210187/pexels-photo-210187.jpeg',
+      'https://images.pexels.com/photos/210188/pexels-photo-210188.jpeg'
+    ],
+    coordinates: {
+      latitude: 27.6964,
+      longitude: 85.5036
+    },
+    rating: 4.5,
+    duration: '1-2 days',
+    price: '$50-100',
+    hasAudioGuide: false,
+    howToGetThere: 'Nagarkot can be reached by a 1-2 hour drive from Kathmandu. Local buses and private taxis are available.',
+    bestTimeToVisit: 'September to November and March to May for clear skies and stunning mountain views.',
+    facilities: ['Hotels', 'Restaurants', 'Trekking Guides'],
+    interests: ['nature', 'hiking', 'photography']
+  },
+  {
+    id: 'dest012',
+    name: 'Bandipur',
+    region: 'Tanahun',
+    category: 'cultural',
+    description: 'Bandipur is a picturesque hilltop town located along the Prithvi Highway. It is known for its preserved cultural heritage, traditional Newari architecture, and stunning views of the Himalayas. The town offers a glimpse into the rich history and culture of Nepal, with ancient temples, local markets, and scenic hiking trails.',
+    images: [
+      'https://images.pexels.com/photos/210189/pexels-photo-210189.jpeg',
+      'https://images.pexels.com/photos/210190/pexels-photo-210190.jpeg',
+      'https://images.pexels.com/photos/210191/pexels-photo-210191.jpeg'
+    ],
+    coordinates: {
+      latitude: 27.8954,
+      longitude: 84.3740
+    },
+    rating: 4.6,
+    duration: '1-2 days',
+    price: '$50-150',
+    hasAudioGuide: false,
+    howToGetThere: 'Bandipur can be reached by a 3-4 hour drive from Kathmandu or Pokhara. Local buses and private taxis are available.',
+    bestTimeToVisit: 'September to November and March to May for pleasant weather and clear views.',
+    facilities: ['Homestays', 'Restaurants', 'Trekking Guides'],
+    interests: ['cultural', 'heritage', 'photography']
+  },
 ];
 
 // Mock data for interests

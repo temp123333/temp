@@ -10,7 +10,7 @@ interface SearchBarProps {
 
 export default function SearchBar({ 
   value = '', 
-  onChangeText,
+  onChangeText = () => {},
   onFilterPress
 }: SearchBarProps) {
   return (
@@ -23,9 +23,17 @@ export default function SearchBar({
           placeholderTextColor="#94A3B8"
           value={value}
           onChangeText={onChangeText}
+          returnKeyType="search"
+          autoCorrect={false}
+          autoCapitalize="none"
+          editable={true}
         />
         {onFilterPress && (
-          <TouchableOpacity onPress={onFilterPress} style={styles.filterButton}>
+          <TouchableOpacity 
+            onPress={onFilterPress} 
+            style={styles.filterButton}
+            activeOpacity={0.7}
+          >
             <Sliders size={20} color="#1E40AF" />
           </TouchableOpacity>
         )}
@@ -47,18 +55,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#E2E8F0',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   searchIcon: {
     marginRight: 8,
   },
   input: {
     flex: 1,
+    height: 48,
     fontFamily: 'Poppins-Regular',
     fontSize: 16,
     color: '#1E293B',
-    paddingVertical: 12,
+    paddingVertical: 0, // Changed from 12 to fix Android alignment
   },
   filterButton: {
     padding: 8,
+    marginLeft: 8,
   },
 });
