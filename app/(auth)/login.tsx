@@ -217,12 +217,14 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
+marginBottom: 8,
     includeFontPadding: false, // Android specific
   },
   subtitle: {
     fontFamily: 'Poppins-Regular',
     fontSize: Platform.OS === 'android' ? 15 : 17,
     color: '#ffffff',
+    marginBottom: 8,
     textAlign: 'center',
     marginTop: Platform.OS === 'android' ? 4 : 6,
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
