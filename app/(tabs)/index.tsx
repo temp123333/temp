@@ -137,13 +137,11 @@ export default function HomeScreen() {
             </View>
             <View>
               <View style={styles.locationTag}>
-                <MapPin size={14} color="#ffffff" />
+                <MapPin size={14} color="#ffffff" /> 
                 <Text style={styles.locationText}>Langtang National Park</Text>
               </View>
               <Text style={styles.featuredTitle}>Gosainkunda Lake</Text>
-              <Text style={styles.featuredSubtitle}>
-                Sacred alpine lake at 4,380m altitude with stunning Himalayan views
-              </Text>
+              
             </View>
           </LinearGradient>
         </TouchableOpacity>

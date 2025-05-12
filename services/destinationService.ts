@@ -145,7 +145,7 @@ const destinations: Destination[] = [
     price: '$250-600 (depending on lodge standard)',
     audioGuide: 'https://example.com/audio/bardia',
     hasAudioGuide: true,
-    howToGetThere: 'Option 1: Fly Kathmandu-Nepalgunj (1hr), then 2hr drive to park. Option 2: 15hr bus from Kathmandu or 7hr from Pokhara. The park entrance is at Thakurdwara. Most visitors stay at lodges near the park headquarters. Private vehicles recommended for flexibility on safari timings.',
+    howToGetThere: 'Option 1: Fly Kathmandu-Nepalgunj (1hr) then 2hr drive to park. Option 2: 15hr bus from Kathmandu or 7hr from Pokhara. The park entrance is at Thakurdwara. Most visitors stay at lodges near the park headquarters. Private vehicles recommended for flexibility on safari timings.',
     bestTimeToVisit: 'February-May (best for tiger sightings as animals congregate at water sources) and October-December (pleasant weather). June-September is hot and humid with possible flooding; January can be foggy in mornings.',
     facilities: ['Luxury jungle lodges to budget hotels', 'Restaurants serving local/international cuisine', 'Visitor center with wildlife exhibits', 'Elephant breeding center', 'Tharu cultural museum'],
     interests: ['wildlife', 'nature', 'adventure', 'birdwatching', 'cultural']
