@@ -1,3 +1,5 @@
+// constants/Colors.ts
+
 const tintColorLight = '#1E40AF';
 const tintColorDark = '#60A5FA';
 
@@ -5,9 +7,9 @@ export default {
   light: {
     text: '#1E293B',
     subtext: '#64748B',
-    background: '#F8FAFC',
+    background: 'white',
     tint: tintColorLight,
-    tabIconDefault: '#94A3B8',
+    tabIconDefault: 'black',
     tabIconSelected: tintColorLight,
     primary: '#1E40AF',
     secondary: '#B91C1C',
@@ -17,6 +19,7 @@ export default {
     error: '#EF4444',
     card: '#FFFFFF',
     border: '#E2E8F0',
+    tabBarBackground: 'white', // 💙 Dark blue for visible contrast
   },
   dark: {
     text: '#F8FAFC',
@@ -33,5 +36,6 @@ export default {
     error: '#F87171',
     card: '#1E293B',
     border: '#334155',
+    tabBarBackground: '#F8FAFC', // 🌒 Deep gray-blue for contrast
   },
 };

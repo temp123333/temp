@@ -6,33 +6,34 @@ import { wp, hp } from '@/utils/responsive';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? 'light'];
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].tabIconDefault,
+        tabBarActiveTintColor: theme.tint,
+        tabBarInactiveTintColor: theme.tabIconDefault,
         tabBarStyle: {
           position: 'absolute',
           left: wp(5),
           right: wp(5),
-          bottom: hp(5), // Keeps the container in the same position
+          bottom: hp(5),
           height: hp(9.5),
           paddingBottom: hp(1.2),
           paddingTop: hp(1),
-          backgroundColor: Colors[colorScheme ?? 'light'].background,
-          borderRadius: 16, // Rounded corners for a sleek look
+          backgroundColor: theme.tabBarBackground, // ✅ CHANGED TO CUSTOM COLOR
+          borderRadius: 20,
           borderTopWidth: 0,
-          elevation: 8, // Android shadow
+          elevation: 10,
           shadowColor: '#000',
-          shadowOpacity: 0.2, // Increased opacity for better visibility
-          shadowRadius: 10,
+          shadowOpacity: 0.25,
+          shadowRadius: 12,
           shadowOffset: { width: 0, height: -4 },
-          zIndex: 999, // Ensures the tab bar is on top of other content
+          zIndex: 999,
         },
         tabBarItemStyle: {
           paddingVertical: hp(0.5),
-          justifyContent: 'center', // Ensures the icon is centered vertically
+          justifyContent: 'center',
         },
         tabBarLabelStyle: {
           fontFamily: 'Poppins-Medium',
@@ -41,8 +42,8 @@ export default function TabLayout() {
           includeFontPadding: false,
         },
         tabBarIconStyle: {
-          marginTop: 0, // Removed marginTop to keep it centered
-          justifyContent: 'center', // Ensures icons are centered within the tab
+          marginTop: 0,
+          justifyContent: 'center',
         },
         headerShown: false,
       }}
