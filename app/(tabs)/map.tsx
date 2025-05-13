@@ -75,7 +75,7 @@ const HTML_MAP = `
       window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ERROR', message }));
     };
   </script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCFfj9_cTVjpNMqfNeDwVnMKCfm-sn6lF0&callback=initMap"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDxnn3wxLYRlouBsQ4N_jsMCIJ8Gxa4rc&callback=initMap"></script>
 </body>
 </html>
 `;
@@ -138,7 +138,6 @@ export default function MapScreen() {
   };
 
   const centerMapOnUserLocation = () => {
-    // In real usage, replace with actual location
     if (webViewRef.current) {
       webViewRef.current.postMessage(JSON.stringify({
         type: 'CENTER_MAP',

@@ -1,51 +1,82 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, ScrollView, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, ScrollView, Platform, Alert } from 'react-native';
 import { router } from 'expo-router';
-import { Search, Play, ChevronRight, MapPin, Star } from 'lucide-react-native';
+import { Search, ChevronRight, Calendar, MapPin, Star, Compass, Mountain, BookOpen } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { getTopDestinations, getNearbyAttractions, getInterests } from '@/services/destinationService';
-import { Destination, Interest } from '@/types';
+import * as Location from 'expo-location';
+import { getTopDestinations, getNearbyAttractions } from '@/services/destinationService';
+import { Destination } from '@/types';
 import DestinationCard from '@/components/DestinationCard';
-import InterestChip from '@/components/InterestChip';
 import SearchBar from '@/components/SearchBar';
+
+// Helper function to darken colors for gradients
+const darkenColor = (color: string, percent: number) => {
+  // Implementation would depend on your color handling
+  return color; // Replace with actual color manipulation
+};
+
+const quickFilters = [
+  { 
+    id: 'heritage', 
+    name: 'Heritage', 
+    icon: Compass, 
+    color: '#B45309',
+    description: 'Ancient temples & historical sites' 
+  },
+  { 
+    id: 'nearby', 
+    name: 'Near You', 
+    icon: MapPin, 
+    color: '#10B981',
+    description: 'Attractions close to your location' 
+  },
+  { 
+    id: 'himalayas', 
+    name: 'Himalayas', 
+    icon: Mountain, 
+    color: '#3B82F6',
+    description: 'Majestic mountain destinations' 
+  },
+  { 
+    id: 'cultural', 
+    name: 'Cultural', 
+    icon: BookOpen, 
+    color: '#8B5CF6',
+    description: 'Festivals & local traditions' 
+  }
+];
+
+const nepaliHighlights = [
+  {
+    title: 'Local Wisdom',
+    description: 'Tips from Nepali guides for authentic experiences',
+    icon: BookOpen,
+    color: '#B45309'
+  },
+  {
+    title: 'Hidden Trails',
+    description: 'Lesser-known paths recommended by locals',
+    icon: Mountain,
+    color: '#10B981'
+  }
+];
 
 export default function HomeScreen() {
   const [topDestinations, setTopDestinations] = useState<Destination[]>([]);
   const [nearbyAttractions, setNearbyAttractions] = useState<Destination[]>([]);
-  const [interests, setInterests] = useState<Interest[]>([]);
-  const [selectedInterest, setSelectedInterest] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const fadeAnim = useState(new Animated.Value(0))[0];
-  const slideAnim = useState(new Animated.Value(30))[0];
+  const [searchQuery, setSearchQuery] = useState('');
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        const [topDest, nearby, interestData] = await Promise.all([
-          getTopDestinations(),
-          getNearbyAttractions(),
-          getInterests()
-        ]);
+        const topDest = await getTopDestinations();
+        const nearby = await getNearbyAttractions();
         
         setTopDestinations(topDest);
         setNearbyAttractions(nearby);
-        setInterests(interestData);
-        
-        // Start animations when data is loaded
-        Animated.parallel([
-          Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(slideAnim, {
-            toValue: 0,
-            duration: 600,
-            easing: Easing.out(Easing.quad),
-            useNativeDriver: true,
-          })
-        ]).start();
       } catch (error) {
         console.error('Failed to load data:', error);
       } finally {
@@ -54,10 +85,30 @@ export default function HomeScreen() {
     };
 
     loadData();
+    requestLocationPermission();
   }, []);
 
-  const handleSelectInterest = (id: string) => {
-    setSelectedInterest(selectedInterest === id ? null : id);
+  const requestLocationPermission = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        const currentLocation = await Location.getCurrentPositionAsync({});
+        setLocation(currentLocation);
+      } else {
+        Alert.alert(
+          'Location Permission',
+          'Please enable location services to discover nearby attractions.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('Error requesting location permission:', error);
+    }
+  };
+
+  const handleSearch = (text: string) => {
+    setSearchQuery(text);
+    // Implement search logic here
   };
 
   const handleDestinationPress = (id: string) => {
@@ -65,100 +116,68 @@ export default function HomeScreen() {
   };
 
   return (
-    <Animated.ScrollView 
-      style={[styles.container, { opacity: fadeAnim }]}
-      showsVerticalScrollIndicator={false}
-    >
-      <Animated.View style={[styles.header, { transform: [{ translateY: slideAnim }] }]}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.header}>
         <View style={styles.welcomeContainer}>
-          <Text style={styles.welcomeText}>Namaste, User!</Text>
-          <Text style={styles.headerTitle}>Discover Hidden Gems in Nepal</Text>
+          <Text style={styles.welcomeText}>Namaste</Text>
+          <Text style={styles.headerTitle}>Discover Nepal's Hidden Gems</Text>
         </View>
-        <TouchableOpacity onPress={() => router.push('/profile')}>
-          <Image 
-            source={{ uri: 'https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg' }}
-            style={styles.avatar}
-          />
-        </TouchableOpacity>
-      </Animated.View>
-
-      <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
-        <SearchBar />
-      </Animated.View>
-
-      <Animated.View style={[styles.interestsContainer, { opacity: fadeAnim }]}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Explore by Interest</Text>
-          <TouchableOpacity>
-            <Text style={styles.seeMoreText}>See more</Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={interests}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <InterestChip
-              interest={item}
-              isSelected={selectedInterest === item.id}
-              onSelect={() => handleSelectInterest(item.id)}
-            />
-          )}
-          contentContainerStyle={styles.interestsList}
+        <Image 
+          source={{ uri: 'https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg' }}
+          style={styles.avatar}
         />
-      </Animated.View>
+      </View>
 
-      <Animated.View style={[styles.featuredContainer, { opacity: fadeAnim }]}>
-        <Text style={styles.featuredLabel}>Featured Destination</Text>
-        <TouchableOpacity 
-          activeOpacity={0.8}
-          onPress={() => handleDestinationPress('featured001')}
-          style={styles.featuredCard}
-        >
-          <Image
-            source={{ uri: 'https://images.pexels.com/photos/2698413/pexels-photo-2698413.jpeg' }}
-            style={styles.featuredImage}
-          />
-          <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.8)']}
-            locations={[0, 0.6, 1]}
-            style={styles.featuredGradient}
-          >
-            <View style={styles.featuredBadges}>
-              <View style={styles.audioGuideTag}>
-                <Play size={12} color="#ffffff" fill="#ffffff" />
-                <Text style={styles.audioGuideText}>Audio Guide</Text>
-              </View>
-              <View style={styles.ratingTag}>
-                <Star size={12} color="#FFD700" fill="#FFD700" />
-                <Text style={styles.ratingText}>4.8</Text>
-              </View>
-            </View>
-            <View>
-              <View style={styles.locationTag}>
-                <MapPin size={14} color="#ffffff" /> 
-                <Text style={styles.locationText}>Langtang National Park</Text>
-              </View>
-              <Text style={styles.featuredTitle}>Gosainkunda Lake</Text>
-              
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
-      </Animated.View>
+      <SearchBar value={searchQuery} onChangeText={handleSearch} />
 
-      <Animated.View style={[styles.section, { opacity: fadeAnim }]}>
-        <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleContainer}>
-            <Text style={styles.sectionTitle}>Top Hidden Gems</Text>
-            <View style={styles.titleUnderline} />
+      <View style={styles.quickFiltersContainer}>
+        <Text style={styles.sectionSubtitle}>Explore Nepal</Text>
+        <View style={styles.filtersRow}>
+          {quickFilters.map((filter) => (
+            <TouchableOpacity 
+              key={filter.id}
+              style={styles.quickFilterCard}
+              onPress={() => router.push(`/discover?filter=${filter.id}`)}
+            >
+              <LinearGradient
+                colors={[filter.color, darkenColor(filter.color, 20)]}
+                style={styles.quickFilterGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <filter.icon size={28} color="#FFFFFF" />
+              </LinearGradient>
+              <View style={styles.filterTextContainer}>
+                <Text style={styles.quickFilterText}>{filter.name}</Text>
+                <Text style={styles.quickFilterDescription}>{filter.description}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.highlightsContainer}>
+        {nepaliHighlights.map((highlight, index) => (
+          <View key={index} style={styles.highlightCard}>
+            <View style={[styles.highlightIcon, { backgroundColor: highlight.color }]}>
+              <highlight.icon size={24} color="#FFFFFF" />
+            </View>
+            <View style={styles.highlightContent}>
+              <Text style={styles.highlightTitle}>{highlight.title}</Text>
+              <Text style={styles.highlightDescription}>{highlight.description}</Text>
+            </View>
           </View>
-          <TouchableOpacity 
-            onPress={() => router.push('/discover')}
-            style={styles.viewAllButton}
-          >
-            <Text style={styles.viewAllText}>View All</Text>
-            <ChevronRight size={16} color="#1E40AF" />
+        ))}
+      </View>
+
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Popular Destinations</Text>
+          <TouchableOpacity onPress={() => router.push('/discover')}>
+            <View style={styles.viewAllButton}>
+              <Text style={styles.viewAllText}>View All</Text>
+              <ChevronRight size={16} color="#1E40AF" />
+            </View>
           </TouchableOpacity>
         </View>
         <FlatList
@@ -174,20 +193,16 @@ export default function HomeScreen() {
           )}
           contentContainerStyle={styles.destinationsList}
         />
-      </Animated.View>
+      </View>
 
-      <Animated.View style={[styles.section, { opacity: fadeAnim }]}>
+      <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleContainer}>
-            <Text style={styles.sectionTitle}>Nearby Attractions</Text>
-            <View style={styles.titleUnderline} />
-          </View>
-          <TouchableOpacity 
-            onPress={() => router.push('/map')}
-            style={styles.viewAllButton}
-          >
-            <Text style={styles.viewAllText}>View Map</Text>
-            <ChevronRight size={16} color="#1E40AF" />
+          <Text style={styles.sectionTitle}>Nearby Attractions</Text>
+          <TouchableOpacity onPress={() => router.push('/map')}>
+            <View style={styles.viewAllButton}>
+              <Text style={styles.viewAllText}>View Map</Text>
+              <ChevronRight size={16} color="#1E40AF" />
+            </View>
           </TouchableOpacity>
         </View>
         <FlatList
@@ -204,10 +219,10 @@ export default function HomeScreen() {
           )}
           contentContainerStyle={styles.destinationsList}
         />
-      </Animated.View>
+      </View>
 
       <View style={styles.spacer} />
-    </Animated.ScrollView>
+    </ScrollView>
   );
 }
 
@@ -219,9 +234,9 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingHorizontal: 24,
-    paddingTop: 60,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingBottom: 16,
   },
   welcomeContainer: {
@@ -231,12 +246,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     fontSize: 16,
     color: '#1E40AF',
-    marginBottom: 4,
   },
   headerTitle: {
     fontFamily: 'Poppins-Bold',
-    fontSize: 24,
-    lineHeight: 32,
+    fontSize: 22,
     color: '#1E293B',
     width: '90%',
   },
@@ -247,156 +260,131 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#E2E8F0',
   },
-  interestsContainer: {
+  quickFiltersContainer: {
+    paddingHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  sectionSubtitle: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 16,
+    color: '#1E293B',
+    marginBottom: 16,
+  },
+  filtersRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  quickFilterCard: {
+    width: '48%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+  quickFilterGradient: {
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterTextContainer: {
+    padding: 12,
+  },
+  quickFilterText: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 14,
+    color: '#1E293B',
+    marginBottom: 4,
+  },
+  quickFilterDescription: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 12,
+    color: '#64748B',
+    lineHeight: 16,
+  },
+  highlightsContainer: {
+    paddingHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  highlightCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  highlightIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  highlightContent: {
+    flex: 1,
+  },
+  highlightTitle: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 16,
+    color: '#1E293B',
+    marginBottom: 4,
+  },
+  highlightDescription: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: '#64748B',
+  },
+  section: {
     marginTop: 24,
-    paddingHorizontal: 4,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 16,
-  },
-  sectionTitleContainer: {
-    position: 'relative',
+    paddingHorizontal: 16,
+    marginBottom: 12,
   },
   sectionTitle: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: 20,
+    fontSize: 18,
     color: '#1E293B',
-  },
-  titleUnderline: {
-    position: 'absolute',
-    bottom: -4,
-    left: 0,
-    right: 0,
-    height: 3,
-    backgroundColor: '#1E40AF',
-    opacity: 0.3,
-    borderRadius: 2,
-  },
-  interestsList: {
-    paddingLeft: 16,
-    paddingRight: 8,
-    paddingVertical: 4,
   },
   viewAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
   },
   viewAllText: {
     fontFamily: 'Poppins-Medium',
     fontSize: 14,
     color: '#1E40AF',
-    marginRight: 2,
-  },
-  seeMoreText: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 14,
-    color: '#64748B',
-  },
-  featuredContainer: {
-    marginTop: 24,
-    paddingHorizontal: 20,
-  },
-  featuredLabel: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 14,
-    color: '#64748B',
-    marginBottom: 8,
-    marginLeft: 4,
-  },
-  featuredCard: {
-    height: 220,
-    borderRadius: 20,
-    overflow: 'hidden',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-  },
-  featuredImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  featuredGradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: '70%',
-    justifyContent: 'flex-end',
-    padding: 20,
-  },
-  featuredBadges: {
-    flexDirection: 'row',
-    marginBottom: 12,
-  },
-  audioGuideTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(185, 28, 28, 0.9)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  audioGuideText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 12,
-    color: '#ffffff',
-    marginLeft: 4,
-  },
-  ratingTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-  },
-  ratingText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 12,
-    color: '#FFD700',
-    marginLeft: 4,
-  },
-  locationTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  locationText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 14,
-    color: '#E2E8F0',
-    marginLeft: 4,
-  },
-  featuredTitle: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: 22,
-    lineHeight: 28,
-    color: '#ffffff',
-  },
-  featuredSubtitle: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 14,
-    color: '#E2E8F0',
-    marginTop: 6,
-    lineHeight: 20,
-  },
-  section: {
-    marginTop: 28,
   },
   destinationsList: {
-    paddingLeft: 20,
+    paddingLeft: 16,
     paddingRight: 8,
   },
   spacer: {

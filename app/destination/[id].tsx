@@ -82,7 +82,7 @@ export default function DestinationDetailScreen() {
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>Destination not found</Text>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Go Back</Text>
+          <Text style={styles.backButton}>Go Back</Text>
         </TouchableOpacity>
       </View>
     );

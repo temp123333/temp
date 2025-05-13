@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
-import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { Bell, Globe, CircleHelp as HelpCircle, LogOut, Settings, ChevronRight, Moon } from 'lucide-react-native';
 
@@ -57,11 +56,11 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
       </View>
-      
+
       <View style={styles.profileSection}>
         <Image 
           source={{ uri: 'https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg' }}
@@ -75,7 +74,7 @@ export default function ProfileScreen() {
           <Text style={styles.editButtonText}>Edit</Text>
         </TouchableOpacity>
       </View>
-      
+
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>12</Text>
@@ -92,11 +91,11 @@ export default function ProfileScreen() {
           <Text style={styles.statLabel}>Reviews</Text>
         </View>
       </View>
-      
+
       <View style={styles.sectionTitle}>
         <Text style={styles.sectionTitleText}>Settings</Text>
       </View>
-      
+
       {profileOptions.map((option, index) => (
         <TouchableOpacity 
           key={index} 
@@ -125,12 +124,12 @@ export default function ProfileScreen() {
           </View>
         </TouchableOpacity>
       ))}
-      
+
       <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
         <LogOut size={20} color="#EF4444" />
         <Text style={styles.signOutText}>Sign Out</Text>
       </TouchableOpacity>
-      
+
       <Text style={styles.versionText}>Version 1.0.0</Text>
     </ScrollView>
   );
@@ -140,6 +139,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
+    width: '100%',
   },
   header: {
     paddingHorizontal: 16,
