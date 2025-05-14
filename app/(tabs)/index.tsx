@@ -25,26 +25,41 @@ export default function HomeScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setIsLoading(true);
-        const topDest = await getTopDestinations();
-        const nearby = await getNearbyAttractions();
-        const categoriesData = await getCategories();
-        
-        setTopDestinations(topDest);
-        setNearbyAttractions(nearby);
-        setCategories(categoriesData);
-      } catch (error) {
-        console.error('Failed to load data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadData();
     requestLocationPermission();
   }, []);
+
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const [topDest, categoriesData] = await Promise.all([
+        getTopDestinations(),
+        getCategories()
+      ]);
+      
+      setTopDestinations(topDest);
+      setCategories(categoriesData);
+      
+      // Load nearby attractions after getting location
+      if (location) {
+        const nearby = await getNearbyAttractions(
+          location.coords.latitude,
+          location.coords.longitude
+        );
+        setNearbyAttractions(nearby);
+      }
+    } catch (error) {
+      console.error('Failed to load data:', error);
+      Alert.alert(
+        'Error Loading Data',
+        'Please check your internet connection and try again.',
+        [{ text: 'OK', style: 'default' }],
+        { cancelable: true }
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const requestLocationPermission = async () => {
     try {
@@ -52,15 +67,24 @@ export default function HomeScreen() {
       if (status === 'granted') {
         const currentLocation = await Location.getCurrentPositionAsync({});
         setLocation(currentLocation);
+        // Update nearby attractions with location
+        const nearby = await getNearbyAttractions(
+          currentLocation.coords.latitude,
+          currentLocation.coords.longitude
+        );
+        setNearbyAttractions(nearby);
       } else {
         Alert.alert(
-          'Location Permission',
-          'Please enable location services to discover nearby attractions.',
-          [{ text: 'OK' }]
+          'Location Access Required',
+          'To show you nearby attractions, we need access to your location. You can enable it in your device settings.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Location.openSettings() }
+          ]
         );
       }
     } catch (error) {
-      console.error('Error requesting location permission:', error);
+      console.error('Error requesting location:', error);
     }
   };
 
@@ -74,7 +98,24 @@ export default function HomeScreen() {
   };
 
   const handleCategoryPress = (categoryId: string) => {
-    router.push(`/category/${categoryId}`);
+    if (categoryId === 'hidden-trails') {
+      router.push('/hiddentrails');
+    } else if (categoryId === 'nearby') {
+      if (!location) {
+        Alert.alert(
+          'Location Required',
+          'Please enable location services to see nearby attractions.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Enable Location', onPress: requestLocationPermission }
+          ]
+        );
+        return;
+      }
+      router.push('/map');
+    } else {
+      router.push(`/category/${categoryId}`);
+    }
   };
 
   return (
@@ -102,6 +143,7 @@ export default function HomeScreen() {
                 key={category.id}
                 style={[styles.categoryCard, { backgroundColor: category.color }]}
                 onPress={() => handleCategoryPress(category.id)}
+                activeOpacity={0.8}
               >
                 <IconComponent color="#FFFFFF" size={32} />
                 <Text style={styles.categoryName}>{category.name}</Text>
@@ -115,11 +157,13 @@ export default function HomeScreen() {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Popular Destinations</Text>
-          <TouchableOpacity onPress={() => router.push('/discover')}>
-            <View style={styles.viewAllButton}>
-              <Text style={styles.viewAllText}>View All</Text>
-              <ChevronRight size={16} color="#1E40AF" />
-            </View>
+          <TouchableOpacity 
+            onPress={() => router.push('/discover')}
+            style={styles.viewAllButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.viewAllText}>View All</Text>
+            <ChevronRight size={16} color="#1E40AF" />
           </TouchableOpacity>
         </View>
         <FlatList
@@ -140,11 +184,13 @@ export default function HomeScreen() {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Nearby Attractions</Text>
-          <TouchableOpacity onPress={() => router.push('/map')}>
-            <View style={styles.viewAllButton}>
-              <Text style={styles.viewAllText}>View Map</Text>
-              <ChevronRight size={16} color="#1E40AF" />
-            </View>
+          <TouchableOpacity 
+            onPress={() => router.push('/map')}
+            style={styles.viewAllButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.viewAllText}>View Map</Text>
+            <ChevronRight size={16} color="#1E40AF" />
           </TouchableOpacity>
         </View>
         <FlatList
@@ -252,11 +298,16 @@ const styles = StyleSheet.create({
   viewAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
   viewAllText: {
     fontFamily: 'Poppins-Medium',
     fontSize: 14,
     color: '#1E40AF',
+    marginRight: 4,
   },
   destinationsList: {
     paddingLeft: 16,

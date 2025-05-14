@@ -31,6 +31,7 @@ const CATEGORIES: Category[] = [
     color: '#10B981'
   }
 ];
+
 const DESTINATIONS: Destination[] = [
   {
     id: '1',
@@ -301,6 +302,52 @@ const DESTINATIONS: Destination[] = [
       'Park office'
     ],
     interests: ['nature', 'hiking']
+  },
+  {
+    id: '11',
+    name: 'Gosaikunda Lake',
+    region: 'Langtang',
+    category: 'hidden-trails',
+    description: 'A sacred high-altitude lake surrounded by snow-capped peaks. Popular among both trekkers and pilgrims.',
+    images: [
+      'https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg',
+      'https://images.pexels.com/photos/2387876/pexels-photo-2387876.jpeg'
+    ],
+    coordinates: {
+      latitude: 28.0833,
+      longitude: 85.4167
+    },
+    rating: 4.7,
+    duration: '4-5 days',
+    price: 'NPR 15,000+',
+    hasAudioGuide: false,
+    howToGetThere: 'Drive to Dhunche then trek for 2-3 days',
+    bestTimeToVisit: 'March to May, September to November',
+    facilities: ['Basic lodges', 'Camping sites', 'Tea houses'],
+    interests: ['hiking', 'spiritual', 'nature']
+  },
+  {
+    id: '12',
+    name: 'Upper Mustang',
+    region: 'Mustang',
+    category: 'hidden-trails',
+    description: 'A remote kingdom with Tibetan culture and dramatic desert landscapes.',
+    images: [
+      'https://images.pexels.com/photos/6650184/pexels-photo-6650184.jpeg',
+      'https://images.pexels.com/photos/6650185/pexels-photo-6650185.jpeg'
+    ],
+    coordinates: {
+      latitude: 29.1892,
+      longitude: 83.9744
+    },
+    rating: 4.9,
+    duration: '10-12 days',
+    price: 'NPR 50,000+',
+    hasAudioGuide: true,
+    howToGetThere: 'Fly to Jomsom then trek or drive',
+    bestTimeToVisit: 'March to October',
+    facilities: ['Guesthouses', 'Homestays', 'Cultural sites'],
+    interests: ['cultural', 'hiking', 'photography']
   }
 ];
 
@@ -337,42 +384,126 @@ const INTERESTS: Interest[] = [
   }
 ];
 
+const CACHE_KEYS = {
+  DESTINATIONS: 'destinations',
+  CATEGORIES: 'categories',
+  INTERESTS: 'interests'
+};
+
+const CACHE_EXPIRY = 1000 * 60 * 60; // 1 hour
+
+async function getCachedData(key: string) {
+  try {
+    const cached = await AsyncStorage.getItem(key);
+    if (cached) {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < CACHE_EXPIRY) {
+        return data;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('Cache read error:', error);
+    return null;
+  }
+}
+
+async function setCachedData(key: string, data: any) {
+  try {
+    await AsyncStorage.setItem(
+      key,
+      JSON.stringify({
+        data,
+        timestamp: Date.now()
+      })
+    );
+  } catch (error) {
+    console.error('Cache write error:', error);
+  }
+}
+
 export async function getCategories(): Promise<Category[]> {
-  await new Promise(resolve => setTimeout(resolve, 300));
+  const cached = await getCachedData(CACHE_KEYS.CATEGORIES);
+  if (cached) return cached;
+
+  await new Promise(resolve => setTimeout(resolve, 100));
+  await setCachedData(CACHE_KEYS.CATEGORIES, CATEGORIES);
   return CATEGORIES;
 }
 
 export async function getDestinationsByCategory(categoryId: string): Promise<Destination[]> {
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 200));
+  if (categoryId === 'hidden-trails') {
+    return DESTINATIONS.filter(dest => dest.category === 'hidden-trails');
+  }
   return DESTINATIONS.filter(dest => dest.category === categoryId);
 }
 
 export async function getAllDestinations(): Promise<Destination[]> {
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  const cached = await getCachedData(CACHE_KEYS.DESTINATIONS);
+  if (cached) return cached;
+
+  await new Promise(resolve => setTimeout(resolve, 300));
+  await setCachedData(CACHE_KEYS.DESTINATIONS, DESTINATIONS);
   return DESTINATIONS;
 }
 
 export async function getDestinationById(id: string): Promise<Destination | null> {
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 100));
   return DESTINATIONS.find(dest => dest.id === id) || null;
 }
 
 export async function getTopDestinations(): Promise<Destination[]> {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  return DESTINATIONS.slice(0, 2);
+  await new Promise(resolve => setTimeout(resolve, 200));
+  return DESTINATIONS.slice(0, 4);
 }
 
-export async function getNearbyAttractions(): Promise<Destination[]> {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  return DESTINATIONS.slice(2);
+export async function getNearbyAttractions(latitude?: number, longitude?: number): Promise<Destination[]> {
+  if (!latitude || !longitude) {
+    return DESTINATIONS.slice(0, 5);
+  }
+
+  // Calculate distances and sort by proximity
+  const destinationsWithDistance = DESTINATIONS.map(dest => {
+    const distance = calculateDistance(
+      latitude,
+      longitude,
+      dest.coordinates.latitude,
+      dest.coordinates.longitude
+    );
+    return { ...dest, distance };
+  });
+
+  return destinationsWithDistance
+    .sort((a, b) => (a.distance || 0) - (b.distance || 0))
+    .slice(0, 5);
+}
+
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function toRad(degrees: number): number {
+  return degrees * (Math.PI / 180);
 }
 
 export async function getDestinationsByIds(ids: string[]): Promise<Destination[]> {
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 200));
   return DESTINATIONS.filter(dest => ids.includes(dest.id));
 }
 
 export async function getInterests(): Promise<Interest[]> {
-  await new Promise(resolve => setTimeout(resolve, 300));
+  const cached = await getCachedData(CACHE_KEYS.INTERESTS);
+  if (cached) return cached;
+
+  await new Promise(resolve => setTimeout(resolve, 100));
+  await setCachedData(CACHE_KEYS.INTERESTS, INTERESTS);
   return INTERESTS;
 }
