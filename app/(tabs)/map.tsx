@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { router } from 'expo-router';
-import { Locate, Layers, Info } from 'lucide-react-native';
+import { Locate, Layers, Info, ChevronDown, ChevronUp } from 'lucide-react-native';
 import { getAllDestinations } from '@/services/destinationService';
 import MapLegend from '@/components/MapLegend';
 import { Destination } from '@/types';
@@ -14,12 +14,16 @@ const HTML_MAP = `
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <style>
     body, html, #map { height: 100%; margin: 0; padding: 0; }
+    .custom-marker { background-color: white; padding: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .marker-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
+    .marker-info { font-size: 12px; color: #666; }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <script>
     const locations = [];
+    let activeInfoWindow = null;
 
     function initMap() {
       const nepal = { lat: 28.3949, lng: 84.124 };
@@ -52,6 +56,19 @@ const HTML_MAP = `
     function addMarkers(map, markers) {
       markers.forEach(marker => {
         const position = { lat: marker.latitude, lng: marker.longitude };
+        
+        const contentString = 
+          '<div class="custom-marker">' +
+          '<div class="marker-title">' + marker.name + '</div>' +
+          '<div class="marker-info">' + marker.category + '</div>' +
+          '<div class="marker-info">' + marker.duration + ' | ' + marker.rating + '⭐</div>' +
+          '</div>';
+
+        const infowindow = new google.maps.InfoWindow({
+          content: contentString,
+          maxWidth: 200
+        });
+
         const mapMarker = new google.maps.Marker({
           position,
           map,
@@ -63,10 +80,22 @@ const HTML_MAP = `
         });
 
         mapMarker.addListener('click', () => {
+          if (activeInfoWindow) {
+            activeInfoWindow.close();
+          }
+          infowindow.open(map, mapMarker);
+          activeInfoWindow = infowindow;
+          
           window.ReactNativeWebView.postMessage(JSON.stringify({
             type: 'MARKER_CLICK',
             id: marker.id
           }));
+        });
+
+        map.addListener('click', () => {
+          if (activeInfoWindow) {
+            activeInfoWindow.close();
+          }
         });
       });
     }
@@ -75,7 +104,7 @@ const HTML_MAP = `
       window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ERROR', message }));
     };
   </script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDxnn3wxLYRlouBsQ4N_jsMCIJ8Gxa4rc&callback=initMap"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap"></script>
 </body>
 </html>
 `;
@@ -84,6 +113,8 @@ export default function MapScreen() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showLegend, setShowLegend] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
   const webViewRef = useRef<WebView>(null);
 
   useEffect(() => {
@@ -121,6 +152,9 @@ export default function MapScreen() {
       const markers = destinations.map(dest => ({
         id: dest.id,
         name: dest.name,
+        category: dest.category,
+        duration: dest.duration,
+        rating: dest.rating,
         latitude: dest.coordinates.latitude,
         longitude: dest.coordinates.longitude,
         icon: getIconForCategory(dest.category)
@@ -134,7 +168,9 @@ export default function MapScreen() {
   };
 
   const handleMarkerClick = (id: string) => {
-    router.push(`/destination/${id}`);
+    const destination = destinations.find(d => d.id === id);
+    setSelectedDestination(destination || null);
+    setShowDetails(true);
   };
 
   const centerMapOnUserLocation = () => {
@@ -209,6 +245,54 @@ export default function MapScreen() {
         <Text style={styles.headerTitle}>Explore Nepal</Text>
         <Text style={styles.headerSubtitle}>Discover hidden gems on the map</Text>
       </View>
+
+      {selectedDestination && (
+        <View style={[styles.detailsContainer, !showDetails && styles.detailsCollapsed]}>
+          <TouchableOpacity 
+            style={styles.detailsHeader} 
+            onPress={() => setShowDetails(!showDetails)}
+          >
+            <View>
+              <Text style={styles.detailsTitle}>{selectedDestination.name}</Text>
+              <Text style={styles.detailsSubtitle}>{selectedDestination.region}</Text>
+            </View>
+            {showDetails ? (
+              <ChevronDown size={24} color="#1E293B" />
+            ) : (
+              <ChevronUp size={24} color="#1E293B" />
+            )}
+          </TouchableOpacity>
+          
+          {showDetails && (
+            <ScrollView style={styles.detailsContent}>
+              <Text style={styles.detailsDescription}>
+                {selectedDestination.description}
+              </Text>
+              
+              <View style={styles.detailsSection}>
+                <Text style={styles.sectionTitle}>How to Get There</Text>
+                <Text style={styles.sectionText}>
+                  {selectedDestination.howToGetThere}
+                </Text>
+              </View>
+              
+              <View style={styles.detailsSection}>
+                <Text style={styles.sectionTitle}>Best Time to Visit</Text>
+                <Text style={styles.sectionText}>
+                  {selectedDestination.bestTimeToVisit}
+                </Text>
+              </View>
+              
+              <TouchableOpacity 
+                style={styles.viewMoreButton}
+                onPress={() => router.push(`/destination/${selectedDestination.id}`)}
+              >
+                <Text style={styles.viewMoreButtonText}>View Full Details</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          )}
+        </View>
+      )}
     </View>
   );
 }
@@ -280,5 +364,77 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#E2E8F0',
+  },
+  detailsContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 16,
+    maxHeight: '60%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  detailsCollapsed: {
+    maxHeight: 80,
+  },
+  detailsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: 8,
+  },
+  detailsTitle: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 18,
+    color: '#1E293B',
+  },
+  detailsSubtitle: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: '#64748B',
+  },
+  detailsContent: {
+    marginTop: 8,
+  },
+  detailsDescription: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: '#334155',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  detailsSection: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 16,
+    color: '#1E293B',
+    marginBottom: 8,
+  },
+  sectionText: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: '#334155',
+    lineHeight: 20,
+  },
+  viewMoreButton: {
+    backgroundColor: '#1E40AF',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  viewMoreButtonText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: 16,
+    color: '#ffffff',
   },
 });
