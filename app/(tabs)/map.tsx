@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE, Polyline } from 'react-native-maps';
 import { useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import { getAllDestinations } from '@/services/destinationService';
@@ -12,13 +12,9 @@ export default function MapScreen() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [routeCoordinates, setRouteCoordinates] = useState<any[]>([]);
   const mapRef = useRef<MapView>(null);
-  const [region, setRegion] = useState({
-    latitude: 27.6289,
-    longitude: 85.2374,
-    latitudeDelta: 0.5,
-    longitudeDelta: 0.5,
-  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,26 +27,45 @@ export default function MapScreen() {
           if (selected) {
             setSelectedDestination(selected);
             setDestinations([selected]);
-            setRegion({
-              latitude: selected.coordinates.latitude,
-              longitude: selected.coordinates.longitude,
-              latitudeDelta: 0.02,
-              longitudeDelta: 0.02,
-            });
+            
+            // Get user location
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status === 'granted') {
+              const location = await Location.getCurrentPositionAsync({});
+              setUserLocation({
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude
+              });
+
+              // Fetch route between user location and destination
+              const response = await fetch(
+                `https://router.project-osrm.org/route/v1/driving/${location.coords.longitude},${location.coords.latitude};${selected.coordinates.longitude},${selected.coordinates.latitude}?overview=full&geometries=geojson`
+              );
+              const data = await response.json();
+              if (data.routes && data.routes[0]) {
+                setRouteCoordinates(
+                  data.routes[0].geometry.coordinates.map((coord: number[]) => ({
+                    latitude: coord[1],
+                    longitude: coord[0]
+                  }))
+                );
+              }
+
+              // Animate to show both user location and destination
+              mapRef.current?.fitToCoordinates(
+                [
+                  { latitude: location.coords.latitude, longitude: location.coords.longitude },
+                  selected.coordinates
+                ],
+                {
+                  edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                  animated: true
+                }
+              );
+            }
           }
         } else {
           setDestinations(destinationsData);
-          // Get user location
-          const { status } = await Location.requestForegroundPermissionsAsync();
-          if (status === 'granted') {
-            const location = await Location.getCurrentPositionAsync({});
-            setRegion({
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-              latitudeDelta: 0.5,
-              longitudeDelta: 0.5,
-            });
-          }
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -61,16 +76,6 @@ export default function MapScreen() {
     
     fetchData();
   }, [id]);
-
-  const handleMarkerPress = (destination: Destination) => {
-    setSelectedDestination(destination);
-    mapRef.current?.animateToRegion({
-      latitude: destination.coordinates.latitude,
-      longitude: destination.coordinates.longitude,
-      latitudeDelta: 0.02,
-      longitudeDelta: 0.02,
-    });
-  };
 
   if (loading) {
     return (
@@ -87,38 +92,75 @@ export default function MapScreen() {
         ref={mapRef}
         style={styles.map}
         provider={PROVIDER_GOOGLE}
-        initialRegion={region}
+        initialRegion={{
+          latitude: selectedDestination?.coordinates.latitude || 27.7172,
+          longitude: selectedDestination?.coordinates.longitude || 85.3240,
+          latitudeDelta: 0.02,
+          longitudeDelta: 0.02,
+        }}
         showsUserLocation={true}
         showsMyLocationButton={true}
+        showsCompass={true}
+        showsScale={true}
+        showsTraffic={true}
+        mapType="terrain"
       >
         {destinations.map(destination => (
           <Marker
             key={destination.id}
-            coordinate={{
-              latitude: destination.coordinates.latitude,
-              longitude: destination.coordinates.longitude,
-            }}
-            onPress={() => handleMarkerPress(destination)}
+            coordinate={destination.coordinates}
+            title={destination.name}
+            description={destination.region}
           >
             <View style={styles.markerContainer}>
               <MapPin size={24} color="#1E40AF" />
             </View>
           </Marker>
         ))}
+
+        {routeCoordinates.length > 0 && (
+          <Polyline
+            coordinates={routeCoordinates}
+            strokeColor="#1E40AF"
+            strokeWidth={3}
+            lineDashPattern={[1]}
+          />
+        )}
       </MapView>
       
       {selectedDestination && (
         <View style={styles.destinationCard}>
           <Text style={styles.destinationName}>{selectedDestination.name}</Text>
           <Text style={styles.destinationRegion}>{selectedDestination.region}, Nepal</Text>
-          <View style={styles.ratingContainer}>
-            <Text style={styles.rating}>⭐ {selectedDestination.rating}</Text>
-            <Text style={styles.duration}>{selectedDestination.duration}</Text>
-          </View>
+          {userLocation && (
+            <Text style={styles.distance}>
+              Distance: {calculateDistance(
+                userLocation.latitude,
+                userLocation.longitude,
+                selectedDestination.coordinates.latitude,
+                selectedDestination.coordinates.longitude
+              ).toFixed(1)} km
+            </Text>
+          )}
         </View>
       )}
     </View>
   );
+}
+
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function toRad(degrees: number): number {
+  return degrees * (Math.PI / 180);
 }
 
 const styles = StyleSheet.create({
@@ -176,19 +218,9 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginBottom: 8,
   },
-  ratingContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  rating: {
+  distance: {
     fontSize: 14,
     fontFamily: 'Poppins-Medium',
-    color: '#1E293B',
-  },
-  duration: {
-    fontSize: 14,
-    fontFamily: 'Poppins-Medium',
-    color: '#64748B',
+    color: '#1E40AF',
   },
 });
