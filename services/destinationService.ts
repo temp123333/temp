@@ -31,123 +31,276 @@ const CATEGORIES: Category[] = [
     color: '#10B981'
   }
 ];
-
 const DESTINATIONS: Destination[] = [
   {
     id: '1',
-    name: 'Champadevi Hidden Trail',
-    region: 'Kathmandu Valley',
-    category: 'hidden-trails',
-    description: 'A lesser-known hiking trail that offers panoramic views of the Kathmandu Valley and the Himalayan range. This hidden gem starts from Pharping and takes you through dense forests, traditional villages, and eventually to the sacred Champadevi temple at 2,285m. The trail is particularly beautiful during spring when rhododendrons bloom.',
+    name: 'Nagarkot Sunrise View',
+    region: 'Bhaktapur',
+    category: 'himalayas',
+    description: 'Famous for its breathtaking sunrise views over the Himalayas, including Mount Everest on clear days. The hill station offers panoramic views of the Himalayan range and Kathmandu Valley.',
     images: [
-      'https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg',
-      'https://images.pexels.com/photos/4215113/pexels-photo-4215113.jpeg',
-      'https://images.pexels.com/photos/4215110/pexels-photo-4215110.jpeg'
+      'https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg',
+      'https://images.pexels.com/photos/3255761/pexels-photo-3255761.jpeg'
     ],
     coordinates: {
-      latitude: 27.6289,
-      longitude: 85.2374
+      latitude: 27.7156,
+      longitude: 85.5200
     },
-    rating: 4.7,
-    duration: '5-6 hours',
-    price: 'Free',
-    hasAudioGuide: false,
-    howToGetThere: 'Option 1: Take a bus from Ratnapark to Pharping (1 hour). The trail starts near the Pharping Monastery. Option 2: Take a taxi directly to Pharping (45 minutes from Thamel). Option 3: Drive to Pharping and park near the monastery. The trail is well-marked with red and white flags.',
-    bestTimeToVisit: 'October to May, avoiding monsoon season. Early morning starts are recommended for clear mountain views.',
+    rating: 4.8,
+    duration: 'Full day',
+    price: 'NPR 200',
+    hasAudioGuide: true,
+    howToGetThere: 'Option 1: Take a bus from Bhaktapur to Nagarkot (1.5 hours). Option 2: Drive from Kathmandu (1 hour).',
+    bestTimeToVisit: 'October to December for clearest views',
     facilities: [
-      'Local tea shops on route',
-      'Temple rest areas',
-      'Natural water sources'
+      'Hotels',
+      'Restaurants',
+      'View towers'
     ],
-    interests: ['hiking', 'nature', 'cultural']
+    interests: ['nature', 'photography']
   },
   {
     id: '2',
-    name: 'Sundarijal Secret Waterfall',
-    region: 'Shivapuri National Park',
-    category: 'nature',
-    description: 'Hidden deep within Shivapuri National Park, this secluded waterfall is accessed via a less-traveled trail through pristine forest. The journey takes you past local water collection points, through bamboo groves, and finally to a stunning multi-tiered waterfall. Perfect for those seeking solitude and natural beauty.',
+    name: 'Boudhanath Stupa',
+    region: 'Kathmandu',
+    category: 'cultural',
+    description: 'One of the largest spherical stupas in Nepal and a UNESCO World Heritage Site. The Buddhist monument dominates the skyline and is surrounded by monasteries.',
     images: [
-      'https://images.pexels.com/photos/1659438/pexels-photo-1659438.jpeg',
-      'https://images.pexels.com/photos/2876511/pexels-photo-2876511.jpeg',
-      'https://images.pexels.com/photos/2740956/pexels-photo-2740956.jpeg'
+      'https://images.pexels.com/photos/618833/pexels-photo-618833.jpeg',
+      'https://images.pexels.com/photos/618848/pexels-photo-618848.jpeg'
     ],
     coordinates: {
-      latitude: 27.7619,
-      longitude: 85.4277
+      latitude: 27.7219,
+      longitude: 85.3621
     },
-    rating: 4.8,
-    duration: '3-4 hours',
-    price: 'NPR 100',
-    hasAudioGuide: false,
-    howToGetThere: 'Option 1: Take a bus from Boudha to Sundarijal (30 minutes). Option 2: Take a taxi from Kathmandu (45 minutes). From Sundarijal entrance, follow the water pipeline trail for 1km, then take the right fork at the bamboo grove. Local guides available at entrance.',
-    bestTimeToVisit: 'March to May for moderate water flow. Spectacular during monsoon but trail can be slippery.',
+    rating: 4.9,
+    duration: '2-3 hours',
+    price: 'NPR 400',
+    hasAudioGuide: true,
+    howToGetThere: 'Taxi or local bus from anywhere in Kathmandu',
+    bestTimeToVisit: 'Early morning or evening',
     facilities: [
-      'Park entrance office',
-      'Local guides',
-      'Small shops at start',
-      'Rest shelters'
+      'Restaurants',
+      'Souvenir shops',
+      'Meditation centers'
     ],
-    interests: ['hiking', 'nature', 'photography']
+    interests: ['cultural', 'spiritual']
   },
   {
     id: '3',
-    name: 'Khokana Heritage Village',
-    region: 'Lalitpur',
-    category: 'cultural',
-    description: 'A hidden medieval Newari village known for its traditional mustard oil production and preserved architecture. This UNESCO tentative site offers an authentic glimpse into traditional Newari life, with its unique temples, oil press demonstrations, and traditional farming practices still in use.',
+    name: 'Pokhara Lakeside',
+    region: 'Pokhara',
+    category: 'nature',
+    description: 'The beautiful Phewa Lake surrounded by restaurants, shops and views of the Annapurna mountain range. The lakeside area is the main tourist hub of Pokhara.',
     images: [
-      'https://images.pexels.com/photos/5458388/pexels-photo-5458388.jpeg',
-      'https://images.pexels.com/photos/4215104/pexels-photo-4215104.jpeg',
-      'https://images.pexels.com/photos/4215113/pexels-photo-4215113.jpeg'
+      'https://images.pexels.com/photos/1371360/pexels-photo-1371360.jpeg',
+      'https://images.pexels.com/photos/3225529/pexels-photo-3225529.jpeg'
     ],
     coordinates: {
-      latitude: 27.6289,
-      longitude: 85.2374
+      latitude: 28.2096,
+      longitude: 83.9856
     },
-    rating: 4.6,
-    duration: '2-3 hours',
+    rating: 4.7,
+    duration: 'Half day',
     price: 'Free',
-    hasAudioGuide: true,
-    audioGuide: 'https://example.com/audio/khokana.mp3',
-    howToGetThere: 'Option 1: Take a local bus from Lagankhel to Khokana (20 minutes). Option 2: Take a taxi from Patan (15 minutes). Option 3: Cycle from Patan through scenic countryside (40 minutes).',
-    bestTimeToVisit: 'October to March. Visit during festivals for cultural experiences. Weekends for oil press demonstrations.',
+    hasAudioGuide: false,
+    howToGetThere: '25 minute drive from Pokhara airport',
+    bestTimeToVisit: 'Year-round',
     facilities: [
-      'Local homestays',
-      'Traditional restaurants',
-      'Cultural guides',
-      'Photography spots'
+      'Hotels',
+      'Restaurants',
+      'Boat rentals'
     ],
-    interests: ['cultural', 'photography', 'food']
+    interests: ['nature', 'photography']
   },
   {
     id: '4',
-    name: 'Pilot Baba Cave',
-    region: 'Shivapuri',
-    category: 'adventure',
-    description: 'A mysterious cave with a fascinating history, named after an Indian pilot who meditated here for years. The cave offers a unique blend of adventure and spiritual significance. The challenging trail leads through dense forest and offers stunning valley views.',
+    name: 'Chitwan National Park',
+    region: 'Chitwan',
+    category: 'nature',
+    description: 'UNESCO World Heritage Site known for wildlife viewing including rhinos, elephants and Bengal tigers. Offers jungle safaris and cultural programs.',
     images: [
-      'https://images.pexels.com/photos/4215113/pexels-photo-4215113.jpeg',
-      'https://images.pexels.com/photos/4215110/pexels-photo-4215110.jpeg',
-      'https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg'
+      'https://images.pexels.com/photos/247431/pexels-photo-247431.jpeg',
+      'https://images.pexels.com/photos/1457812/pexels-photo-1457812.jpeg'
     ],
     coordinates: {
-      latitude: 27.7892,
-      longitude: 85.3867
+      latitude: 27.5333,
+      longitude: 84.3333
     },
-    rating: 4.5,
-    duration: '4-5 hours',
-    price: 'NPR 150',
+    rating: 4.8,
+    duration: '2-3 days',
+    price: 'NPR 2000+',
     hasAudioGuide: false,
-    howToGetThere: 'Option 1: Take a bus to Budhanilkantha, then hike up (1 hour). Option 2: Drive to Shivapuri park entrance and take the marked trail. Option 3: Join a guided tour from Thamel. Proper hiking shoes and flashlight required.',
-    bestTimeToVisit: 'October to April. Early morning starts recommended for clear weather.',
+    howToGetThere: '5-6 hour drive from Kathmandu or 25 minute flight',
+    bestTimeToVisit: 'October to March',
     facilities: [
-      'Park entrance',
-      'Guide services',
-      'Rest points',
-      'Temple facilities'
+      'Lodges',
+      'Safari tours',
+      'Visitor center'
     ],
-    interests: ['adventure', 'spiritual', 'hiking']
+    interests: ['nature', 'adventure']
+  },
+  {
+    id: '5',
+    name: 'Patan Durbar Square',
+    region: 'Lalitpur',
+    category: 'cultural',
+    description: 'Ancient royal palace complex with exquisite Newari architecture, temples and statues. Another UNESCO World Heritage Site in the Kathmandu Valley.',
+    images: [
+      'https://images.pexels.com/photos/618833/pexels-photo-618833.jpeg',
+      'https://images.pexels.com/photos/618848/pexels-photo-618848.jpeg'
+    ],
+    coordinates: {
+      latitude: 27.6736,
+      longitude: 85.3243
+    },
+    rating: 4.6,
+    duration: '2 hours',
+    price: 'NPR 1000',
+    hasAudioGuide: true,
+    howToGetThere: 'Short taxi ride from Kathmandu',
+    bestTimeToVisit: 'Morning hours',
+    facilities: [
+      'Museum',
+      'Cafes',
+      'Guided tours'
+    ],
+    interests: ['cultural', 'photography']
+  },
+  {
+    id: '6',
+    name: 'Everest Base Camp Trek',
+    region: 'Solukhumbu',
+    category: 'himalayas',
+    description: 'The iconic trek to the base of the worlds highest mountain. Challenging but rewarding journey through Sherpa villages and high Himalayan landscapes.',
+    images: [
+      'https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg',
+      'https://images.pexels.com/photos/3255761/pexels-photo-3255761.jpeg'
+    ],
+    coordinates: {
+      latitude: 27.9881,
+      longitude: 86.9250
+    },
+    rating: 4.9,
+    duration: '12-14 days',
+    price: 'NPR 150,000+',
+    hasAudioGuide: false,
+    howToGetThere: 'Fly to Lukla from Kathmandu then trek',
+    bestTimeToVisit: 'March-May and September-November',
+    facilities: [
+      'Teahouses',
+      'Guide services',
+      'Medical posts'
+    ],
+    interests: ['hiking', 'adventure']
+  },
+  {
+    id: '7',
+    name: 'Lumbini',
+    region: 'Rupandehi',
+    category: 'cultural',
+    description: 'Birthplace of Lord Buddha and important pilgrimage site. Features monasteries from different countries, the sacred garden and Maya Devi Temple.',
+    images: [
+      'https://images.pexels.com/photos/618833/pexels-photo-618833.jpeg',
+      'https://images.pexels.com/photos/618848/pexels-photo-618848.jpeg'
+    ],
+    coordinates: {
+      latitude: 27.4692,
+      longitude: 83.2756
+    },
+    rating: 4.7,
+    duration: 'Full day',
+    price: 'NPR 500',
+    hasAudioGuide: true,
+    howToGetThere: '1 hour flight or 8 hour drive from Kathmandu',
+    bestTimeToVisit: 'October to March',
+    facilities: [
+      'Hotels',
+      'Restaurants',
+      'Museum'
+    ],
+    interests: ['cultural', 'spiritual']
+  },
+  {
+    id: '8',
+    name: 'Annapurna Circuit',
+    region: 'Annapurna',
+    category: 'himalayas',
+    description: 'One of the worlds classic treks circling the Annapurna massif. Passes through diverse landscapes from subtropical to alpine zones.',
+    images: [
+      'https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg',
+      'https://images.pexels.com/photos/3255761/pexels-photo-3255761.jpeg'
+    ],
+    coordinates: {
+      latitude: 28.5275,
+      longitude: 83.9436
+    },
+    rating: 4.9,
+    duration: '15-20 days',
+    price: 'NPR 120,000+',
+    hasAudioGuide: false,
+    howToGetThere: 'Drive or bus to Besisahar then trek',
+    bestTimeToVisit: 'March-May and September-November',
+    facilities: [
+      'Teahouses',
+      'Guide services',
+      'Medical posts'
+    ],
+    interests: ['hiking', 'adventure']
+  },
+  {
+    id: '9',
+    name: 'Bhaktapur Durbar Square',
+    region: 'Bhaktapur',
+    category: 'cultural',
+    description: 'Well-preserved ancient city with magnificent temples and palaces. Known for its pottery squares and traditional Newari culture.',
+    images: [
+      'https://images.pexels.com/photos/618833/pexels-photo-618833.jpeg',
+      'https://images.pexels.com/photos/618848/pexels-photo-618848.jpeg'
+    ],
+    coordinates: {
+      latitude: 27.6710,
+      longitude: 85.4295
+    },
+    rating: 4.7,
+    duration: 'Half day',
+    price: 'NPR 1500',
+    hasAudioGuide: true,
+    howToGetThere: '1 hour drive from Kathmandu',
+    bestTimeToVisit: 'Morning hours',
+    facilities: [
+      'Museum',
+      'Traditional restaurants',
+      'Guided tours'
+    ],
+    interests: ['cultural', 'photography']
+  },
+  {
+    id: '10',
+    name: 'Rara Lake',
+    region: 'Mugu',
+    category: 'nature',
+    description: 'Nepals largest lake located in remote northwestern region. Crystal clear waters surrounded by pine forests and snow-capped mountains.',
+    images: [
+      'https://images.pexels.com/photos/1371360/pexels-photo-1371360.jpeg',
+      'https://images.pexels.com/photos/3225529/pexels-photo-3225529.jpeg'
+    ],
+    coordinates: {
+      latitude: 29.5200,
+      longitude: 82.0875
+    },
+    rating: 4.8,
+    duration: '7-10 day trek',
+    price: 'NPR 80,000+',
+    hasAudioGuide: false,
+    howToGetThere: 'Fly to Nepalgunj then Talcha Airport, then trek',
+    bestTimeToVisit: 'April-May and September-October',
+    facilities: [
+      'Basic lodges',
+      'Camping sites',
+      'Park office'
+    ],
+    interests: ['nature', 'hiking']
   }
 ];
 
