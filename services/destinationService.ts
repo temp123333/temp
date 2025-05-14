@@ -38,10 +38,15 @@ const DESTINATIONS: Destination[] = [
     name: 'Nagarkot Sunrise View',
     region: 'Bhaktapur',
     category: 'himalayas',
-    description: 'Famous for its breathtaking sunrise views over the Himalayas, including Mount Everest on clear days. The hill station offers panoramic views of the Himalayan range and Kathmandu Valley.',
+    description: `Perched at an elevation of 2,175 meters, Nagarkot offers one of the most breathtaking panoramic views of the Himalayan range. On a clear day, you can see eight out of thirteen Himalayan ranges from the view tower, including Mount Everest in the east and Dhaulagiri in the west. The sunrise view is particularly spectacular, as the first rays of the sun paint the snow-capped peaks in hues of gold and pink.
+
+The hill station is surrounded by terraced hillsides and pine forests, making it a perfect escape from the bustling city life of Kathmandu. The area is also known for its rich biodiversity and is a haven for bird watchers, with over 100 species of birds inhabiting the region.
+
+Historical significance: During the ancient times, Nagarkot was an ancient fort city, strategically built to monitor external activities in other kingdoms. Today, it has transformed into a peaceful retreat that attracts nature lovers and photography enthusiasts from around the world.`,
     images: [
-      'https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg',
-      'https://images.pexels.com/photos/3255761/pexels-photo-3255761.jpeg'
+      'https://images.pexels.com/photos/2437291/pexels-photo-2437291.jpeg',
+      'https://images.pexels.com/photos/4215113/pexels-photo-4215113.jpeg',
+      'https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg'
     ],
     coordinates: {
       latitude: 27.7156,
@@ -51,14 +56,23 @@ const DESTINATIONS: Destination[] = [
     duration: 'Full day',
     price: 'NPR 200',
     hasAudioGuide: true,
-    howToGetThere: 'Option 1: Take a bus from Bhaktapur to Nagarkot (1.5 hours). Option 2: Drive from Kathmandu (1 hour).',
-    bestTimeToVisit: 'October to December for clearest views',
+    audioGuide: 'https://example.com/audio/nagarkot.mp3',
+    howToGetThere: `Option 1: Take a direct bus from Kathmandu's Ratna Park to Nagarkot (2 hours).
+Option 2: Take a taxi from Kathmandu (1-1.5 hours).
+Option 3: Take a local bus to Bhaktapur, then transfer to a Nagarkot-bound bus.
+Option 4: Hire a private car with driver for more flexibility.`,
+    bestTimeToVisit: 'October to December for clearest mountain views. Arrive before sunrise (around 5 AM) for the best experience. The winter months offer the clearest views but can be quite cold.',
     facilities: [
-      'Hotels',
-      'Restaurants',
-      'View towers'
+      'Luxury Hotels',
+      'Budget Guesthouses',
+      'Mountain View Cafes',
+      'View Tower',
+      'Hiking Trails',
+      'Photography Points',
+      'Guide Services',
+      'Mountain Bikes for Rent'
     ],
-    interests: ['nature', 'photography']
+    interests: ['nature', 'photography', 'hiking', 'adventure']
   },
   {
     id: '2',
