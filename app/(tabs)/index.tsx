@@ -1,69 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, ScrollView, Platform, Alert } from 'react-native';
 import { router } from 'expo-router';
-import { Search, ChevronRight, Calendar, MapPin, Star, Compass, Mountain, BookOpen } from 'lucide-react-native';
+import { Search, ChevronRight, Calendar, MapPin, Star, Compass, Mountain, BookOpen, Footprints, Landmark } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
-import { getTopDestinations, getNearbyAttractions } from '@/services/destinationService';
-import { Destination } from '@/types';
+import { getTopDestinations, getNearbyAttractions, getCategories } from '@/services/destinationService';
+import { Destination, Category } from '@/types';
 import DestinationCard from '@/components/DestinationCard';
 import SearchBar from '@/components/SearchBar';
 
-// Helper function to darken colors for gradients
-const darkenColor = (color: string, percent: number) => {
-  // Implementation would depend on your color handling
-  return color; // Replace with actual color manipulation
+const iconMap = {
+  Footprints,
+  Mountain,
+  Landmark,
+  MapPin
 };
-
-const quickFilters = [
-  { 
-    id: 'heritage', 
-    name: 'Heritage', 
-    icon: Compass, 
-    color: '#B45309',
-    description: 'Ancient temples & historical sites' 
-  },
-  { 
-    id: 'nearby', 
-    name: 'Near You', 
-    icon: MapPin, 
-    color: '#10B981',
-    description: 'Attractions close to your location' 
-  },
-  { 
-    id: 'himalayas', 
-    name: 'Himalayas', 
-    icon: Mountain, 
-    color: '#3B82F6',
-    description: 'Majestic mountain destinations' 
-  },
-  { 
-    id: 'cultural', 
-    name: 'Cultural', 
-    icon: BookOpen, 
-    color: '#8B5CF6',
-    description: 'Festivals & local traditions' 
-  }
-];
-
-const nepaliHighlights = [
-  {
-    title: 'Local Wisdom',
-    description: 'Tips from Nepali guides for authentic experiences',
-    icon: BookOpen,
-    color: '#B45309'
-  },
-  {
-    title: 'Hidden Trails',
-    description: 'Lesser-known paths recommended by locals',
-    icon: Mountain,
-    color: '#10B981'
-  }
-];
 
 export default function HomeScreen() {
   const [topDestinations, setTopDestinations] = useState<Destination[]>([]);
   const [nearbyAttractions, setNearbyAttractions] = useState<Destination[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -74,9 +30,11 @@ export default function HomeScreen() {
         setIsLoading(true);
         const topDest = await getTopDestinations();
         const nearby = await getNearbyAttractions();
+        const categoriesData = await getCategories();
         
         setTopDestinations(topDest);
         setNearbyAttractions(nearby);
+        setCategories(categoriesData);
       } catch (error) {
         console.error('Failed to load data:', error);
       } finally {
@@ -115,6 +73,10 @@ export default function HomeScreen() {
     router.push(`/destination/${id}`);
   };
 
+  const handleCategoryPress = (categoryId: string) => {
+    router.push(`/category/${categoryId}`);
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
@@ -130,44 +92,24 @@ export default function HomeScreen() {
 
       <SearchBar value={searchQuery} onChangeText={handleSearch} />
 
-      <View style={styles.quickFiltersContainer}>
-        <Text style={styles.sectionSubtitle}>Explore Nepal</Text>
-        <View style={styles.filtersRow}>
-          {quickFilters.map((filter) => (
-            <TouchableOpacity 
-              key={filter.id}
-              style={styles.quickFilterCard}
-              onPress={() => router.push(`/discover?filter=${filter.id}`)}
-            >
-              <LinearGradient
-                colors={[filter.color, darkenColor(filter.color, 20)]}
-                style={styles.quickFilterGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+      <View style={styles.categoriesContainer}>
+        <Text style={styles.sectionTitle}>Explore Nepal</Text>
+        <View style={styles.categoriesGrid}>
+          {categories.map(category => {
+            const IconComponent = iconMap[category.icon as keyof typeof iconMap];
+            return (
+              <TouchableOpacity
+                key={category.id}
+                style={[styles.categoryCard, { backgroundColor: category.color }]}
+                onPress={() => handleCategoryPress(category.id)}
               >
-                <filter.icon size={28} color="#FFFFFF" />
-              </LinearGradient>
-              <View style={styles.filterTextContainer}>
-                <Text style={styles.quickFilterText}>{filter.name}</Text>
-                <Text style={styles.quickFilterDescription}>{filter.description}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+                <IconComponent color="#FFFFFF" size={32} />
+                <Text style={styles.categoryName}>{category.name}</Text>
+                <Text style={styles.categoryDescription}>{category.description}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
-      </View>
-
-      <View style={styles.highlightsContainer}>
-        {nepaliHighlights.map((highlight, index) => (
-          <View key={index} style={styles.highlightCard}>
-            <View style={[styles.highlightIcon, { backgroundColor: highlight.color }]}>
-              <highlight.icon size={24} color="#FFFFFF" />
-            </View>
-            <View style={styles.highlightContent}>
-              <Text style={styles.highlightTitle}>{highlight.title}</Text>
-              <Text style={styles.highlightDescription}>{highlight.description}</Text>
-            </View>
-          </View>
-        ))}
       </View>
 
       <View style={styles.section}>
@@ -260,104 +202,37 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#E2E8F0',
   },
-  quickFiltersContainer: {
-    paddingHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 8,
+  categoriesContainer: {
+    padding: 16,
   },
-  sectionSubtitle: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 16,
-    color: '#1E293B',
-    marginBottom: 16,
-  },
-  filtersRow: {
+  categoriesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  quickFilterCard: {
-    width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    overflow: 'hidden',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  quickFilterGradient: {
-    height: 80,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  filterTextContainer: {
-    padding: 12,
-  },
-  quickFilterText: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 14,
-    color: '#1E293B',
-    marginBottom: 4,
-  },
-  quickFilterDescription: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 12,
-    color: '#64748B',
-    lineHeight: 16,
-  },
-  highlightsContainer: {
-    paddingHorizontal: 16,
+    gap: 16,
     marginTop: 16,
-    marginBottom: 24,
   },
-  highlightCard: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+  categoryCard: {
+    width: '47%',
     padding: 16,
-    marginBottom: 12,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  highlightIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  highlightContent: {
-    flex: 1,
-  },
-  highlightTitle: {
+  categoryName: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: 16,
-    color: '#1E293B',
-    marginBottom: 4,
+    fontSize: 18,
+    color: '#FFFFFF',
+    marginTop: 12,
   },
-  highlightDescription: {
+  categoryDescription: {
     fontFamily: 'Poppins-Regular',
     fontSize: 14,
-    color: '#64748B',
+    color: '#FFFFFF',
+    opacity: 0.9,
+    marginTop: 4,
   },
   section: {
     marginTop: 24,
