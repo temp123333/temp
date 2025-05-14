@@ -7,7 +7,6 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
-  const [offlineMode, setOfflineMode] = useState(false);
 
   const handleSignOut = () => {
     Alert.alert(
@@ -42,13 +41,6 @@ export default function ProfileScreen() {
       onPress: () => Alert.alert('Language Settings', 'This feature is coming soon!'),
     },
     {
-      icon: <Settings size={24} color="#1E40AF" />,
-      title: 'Download for Offline',
-      type: 'toggle',
-      value: offlineMode,
-      onToggle: setOfflineMode,
-    },
-    {
       icon: <HelpCircle size={24} color="#1E40AF" />,
       title: 'Help & Support',
       onPress: () => Alert.alert('Help & Support', 'This feature is coming soon!'),
@@ -70,26 +62,12 @@ export default function ProfileScreen() {
           <Text style={styles.profileName}>{user?.name || 'Guest User'}</Text>
           <Text style={styles.profileEmail}>{user?.email || 'guest@example.com'}</Text>
         </View>
-        <TouchableOpacity style={styles.editButton}>
+        <TouchableOpacity 
+          style={styles.editButton}
+          onPress={() => Alert.alert('Edit Profile', 'Update coming soon!')}
+        >
           <Text style={styles.editButtonText}>Edit</Text>
         </TouchableOpacity>
-      </View>
-
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>12</Text>
-          <Text style={styles.statLabel}>Visited</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>24</Text>
-          <Text style={styles.statLabel}>Favorites</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>8</Text>
-          <Text style={styles.statLabel}>Reviews</Text>
-        </View>
       </View>
 
       <View style={styles.sectionTitle}>
@@ -197,38 +175,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     fontSize: 14,
     color: '#1E293B',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-    paddingVertical: 16,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: 20,
-    color: '#1E40AF',
-  },
-  statLabel: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 14,
-    color: '#64748B',
-    marginTop: 4,
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: '#E2E8F0',
   },
   sectionTitle: {
     marginTop: 24,
