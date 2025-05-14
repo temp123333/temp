@@ -1,12 +1,43 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Destination, Interest } from '@/types';
+import { Destination, Interest, Category } from '@/types';
+
+const CATEGORIES: Category[] = [
+  {
+    id: 'hidden-trails',
+    name: 'Hidden Trails',
+    description: 'Discover secret paths and unexplored routes',
+    icon: 'Footprints',
+    color: '#B45309'
+  },
+  {
+    id: 'himalayas',
+    name: 'Himalayas',
+    description: 'Majestic mountain peaks and treks',
+    icon: 'Mountain',
+    color: '#3B82F6'
+  },
+  {
+    id: 'cultural',
+    name: 'Cultural Sites',
+    description: 'Ancient temples and traditional villages',
+    icon: 'Landmark',
+    color: '#8B5CF6'
+  },
+  {
+    id: 'nearby',
+    name: 'Near You',
+    description: 'Attractions close to your location',
+    icon: 'MapPin',
+    color: '#10B981'
+  }
+];
 
 const DESTINATIONS: Destination[] = [
   {
     id: '1',
     name: 'Champadevi Hidden Trail',
     region: 'Kathmandu Valley',
-    category: 'trekking',
+    category: 'hidden-trails',
     description: 'A lesser-known hiking trail that offers panoramic views of the Kathmandu Valley and the Himalayan range. This hidden gem starts from Pharping and takes you through dense forests, traditional villages, and eventually to the sacred Champadevi temple at 2,285m. The trail is particularly beautiful during spring when rhododendrons bloom.',
     images: [
       'https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg',
@@ -153,8 +184,17 @@ const INTERESTS: Interest[] = [
   }
 ];
 
+export async function getCategories(): Promise<Category[]> {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return CATEGORIES;
+}
+
+export async function getDestinationsByCategory(categoryId: string): Promise<Destination[]> {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return DESTINATIONS.filter(dest => dest.category === categoryId);
+}
+
 export async function getAllDestinations(): Promise<Destination[]> {
-  // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1000));
   return DESTINATIONS;
 }

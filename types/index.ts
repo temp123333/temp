@@ -1,3 +1,11 @@
+export interface Category {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+}
+
 export interface Destination {
   id: string;
   name: string;
