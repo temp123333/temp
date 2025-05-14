@@ -90,7 +90,6 @@ export default function HomeScreen() {
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
-    // Implement search logic here
   };
 
   const handleDestinationPress = (id: string) => {
@@ -112,7 +111,7 @@ export default function HomeScreen() {
         );
         return;
       }
-      router.push('/map');
+      router.push('/nearby');
     } else {
       router.push(`/category/${categoryId}`);
     }
