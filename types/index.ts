@@ -20,7 +20,6 @@ export interface Destination {
   rating: number;
   duration: string;
   price: string;
-  audioGuide?: string;
   hasAudioGuide: boolean;
   howToGetThere: string;
   bestTimeToVisit: string;
