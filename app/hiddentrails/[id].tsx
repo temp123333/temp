@@ -57,14 +57,16 @@ export default function TrailDetailScreen() {
           </TouchableOpacity>
         </View>
 
-        <ImageGallery images={trail.images} />
-
         <View style={styles.contentContainer}>
           <Text style={styles.title}>{trail.name}</Text>
 
           <View style={styles.locationRow}>
             <MapPin size={18} color="#64748B" />
             <Text style={styles.location}>{trail.location}</Text>
+          </View>
+
+          <View style={styles.galleryWrapper}>
+            <ImageGallery images={trail.images} />
           </View>
 
           <View style={styles.statsCard}>
@@ -157,6 +159,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
+    paddingTop: Platform.OS === 'ios' ? 100 : 120,
   },
   title: {
     fontSize: 28,
@@ -173,6 +176,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginLeft: 6,
     color: '#475569',
+  },
+  galleryWrapper: {
+    marginVertical: 20,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
   },
   statsCard: {
     flexDirection: 'row',
@@ -231,13 +244,13 @@ const styles = StyleSheet.create({
   },
   listText: {
     fontSize: 15,
-    color: 'black',
+    color: '#334155',
     flex: 1,
   },
   difficultyBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e',
+    backgroundColor: '#DBEAFE',
     padding: 14,
     borderRadius: 10,
     borderLeftWidth: 4,
@@ -262,7 +275,7 @@ const styles = StyleSheet.create({
   },
   gearText: {
     fontSize: 14,
-    color: 'black',
+    color: '#0369A1',
   },
   errorContainer: {
     flex: 1,
