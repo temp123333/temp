@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Star, MapPin } from 'lucide-react-native';
 import { Destination } from '@/types';
 
@@ -10,6 +10,8 @@ interface DestinationCardProps {
 }
 
 export default function DestinationCard({ destination, onPress, compact = false }: DestinationCardProps) {
+  const [imageLoading, setImageLoading] = useState(true);
+
   return (
     <TouchableOpacity 
       style={[styles.card, compact && styles.compactCard]}
@@ -20,7 +22,14 @@ export default function DestinationCard({ destination, onPress, compact = false 
         <Image 
           source={{ uri: destination.images[0] }} 
           style={[styles.image, compact && styles.compactImage]}
+          onLoadStart={() => setImageLoading(true)}
+          onLoadEnd={() => setImageLoading(false)}
         />
+        {imageLoading && (
+          <View style={[styles.loadingContainer, compact && styles.compactImage]}>
+            <ActivityIndicator color="#1E40AF" />
+          </View>
+        )}
 
         {destination.category && (
           <View style={styles.categoryTag}>
@@ -31,7 +40,7 @@ export default function DestinationCard({ destination, onPress, compact = false 
 
       <View style={styles.content}>
         <View style={styles.ratingContainer}>
-          <Star size={14} color="#F59E0B" />
+          <Star size={14} color="#F59E0B" fill="#F59E0B" />
           <Text style={styles.rating}>{destination.rating.toFixed(1)}</Text>
         </View>
 
@@ -62,7 +71,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 4,
-    
     elevation: 3,
   },
   compactCard: {
@@ -78,11 +86,21 @@ const styles = StyleSheet.create({
   compactImage: {
     height: 120,
   },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   categoryTag: {
     position: 'absolute',
     top: 10,
     left: 10,
-    backgroundColor: '#1E40AFCC',
+    backgroundColor: 'rgba(30, 64, 175, 0.9)',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 9999,

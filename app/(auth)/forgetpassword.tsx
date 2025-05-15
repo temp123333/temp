@@ -3,30 +3,50 @@ import {
   View,
   Text,
   TextInput,
-  TouchableNativeFeedback,
+  TouchableOpacity,
   StyleSheet,
   Alert,
   Platform,
   KeyboardAvoidingView,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
-import { Mail, ArrowRight } from 'lucide-react-native';
+import { Mail, ArrowLeft } from 'lucide-react-native';
 import { router } from 'expo-router';
 
 export default function ForgetPassword() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { resetPassword } = useAuth();
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (!email.trim()) {
       setError('Please enter your email');
       return;
     }
+    
+    if (!email.includes('@')) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
     setError('');
-    resetPassword(email.trim());
-    Alert.alert('Password Reset', `A reset link has been sent to ${email}`);
+    setIsLoading(true);
+    
+    try {
+      await resetPassword(email.trim());
+      Alert.alert(
+        'Password Reset',
+        `A reset link has been sent to ${email}`,
+        [{ text: 'OK', onPress: () => router.push('/login') }]
+      );
+    } catch (err) {
+      setError('Failed to send reset link. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -35,6 +55,13 @@ export default function ForgetPassword() {
       style={styles.wrapper}
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <ArrowLeft size={24} color="#1E293B" />
+        </TouchableOpacity>
+
         <Text style={styles.title}>Forgot Password</Text>
         <Text style={styles.subtitle}>Enter your email to reset your password</Text>
 
@@ -51,21 +78,27 @@ export default function ForgetPassword() {
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
+            editable={!isLoading}
           />
         </View>
 
-        <TouchableNativeFeedback onPress={handleResetPassword} background={TouchableNativeFeedback.Ripple('#fff', false)}>
-          <View style={styles.button}>
+        <TouchableOpacity 
+          style={[styles.button, isLoading && styles.buttonDisabled]}
+          onPress={handleResetPassword}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
             <Text style={styles.buttonText}>Send Reset Link</Text>
-            <ArrowRight color="#ffffff" size={20} />
-          </View>
-        </TouchableNativeFeedback>
+          )}
+        </TouchableOpacity>
 
         <View style={styles.backToLoginContainer}>
           <Text style={styles.backToLoginText}>Remember your password? </Text>
-          <Text style={styles.backToLoginLink} onPress={() => router.push('/login')}>
-            Back to Login
-          </Text>
+          <TouchableOpacity onPress={() => router.push('/login')}>
+            <Text style={styles.backToLoginLink}>Back to Login</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -79,25 +112,38 @@ const styles = StyleSheet.create({
   },
   container: {
     flexGrow: 1,
-    justifyContent: 'center',
     padding: 24,
   },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   title: {
+    fontFamily: 'Poppins-Bold',
     fontSize: 26,
-    fontWeight: '700',
     color: '#111827',
     textAlign: 'center',
     marginBottom: 8,
-    fontFamily: Platform.OS === 'android' ? 'Roboto' : undefined,
   },
   subtitle: {
+    fontFamily: 'Poppins-Regular',
     fontSize: 15,
     color: '#6B7280',
     textAlign: 'center',
     marginBottom: 24,
-    fontFamily: Platform.OS === 'android' ? 'Roboto' : undefined,
   },
   errorText: {
+    fontFamily: 'Poppins-Medium',
     color: '#DC2626',
     marginBottom: 16,
     textAlign: 'center',
@@ -106,27 +152,30 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E5E7EB',
-    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   icon: {
     marginRight: 10,
   },
   input: {
     flex: 1,
+    fontFamily: 'Poppins-Regular',
     fontSize: 15,
     color: '#111827',
-    fontFamily: Platform.OS === 'android' ? 'Roboto' : undefined,
   },
   button: {
     backgroundColor: '#2563EB',
-    borderRadius: 8,
+    borderRadius: 12,
     paddingVertical: 14,
-    flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
     elevation: 3,
     shadowColor: '#000',
@@ -134,12 +183,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
+  buttonDisabled: {
+    backgroundColor: '#93C5FD',
+  },
   buttonText: {
+    fontFamily: 'Poppins-SemiBold',
     fontSize: 15,
-    color: '#ffffff',
-    fontWeight: '600',
-    marginRight: 8,
-    fontFamily: Platform.OS === 'android' ? 'Roboto' : undefined,
+    color: '#FFFFFF',
   },
   backToLoginContainer: {
     flexDirection: 'row',
@@ -147,12 +197,13 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   backToLoginText: {
+    fontFamily: 'Poppins-Regular',
     fontSize: 14,
     color: '#4B5563',
   },
   backToLoginLink: {
+    fontFamily: 'Poppins-SemiBold',
     fontSize: 14,
     color: '#2563EB',
-    fontWeight: '600',
   },
 });
