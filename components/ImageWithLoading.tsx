@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
-import { View, Image, StyleSheet, ActivityIndicator, Animated } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, StyleSheet, ActivityIndicator, Animated } from 'react-native';
 import { colors, borderRadius } from '@/constants/theme';
-import { ImageProps } from 'expo-image';
+// import { Image } from 'expo-image';  // Uncomment if using expo-image
 
-interface ImageWithLoadingProps extends Omit<ImageProps, 'source'> {
+interface ImageWithLoadingProps {
   source: { uri: string } | number;
   width: number;
   height: number;
+  style?: object;
 }
 
-export default function ImageWithLoading({ source, style, width, height, ...props }: ImageWithLoadingProps) {
+export default function ImageWithLoading({ source, style, width, height }: ImageWithLoadingProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const opacity = new Animated.Value(0);
+
+  const opacity = useRef(new Animated.Value(0)).current;
 
   const onLoad = () => {
     setIsLoading(false);
@@ -35,7 +37,7 @@ export default function ImageWithLoading({ source, style, width, height, ...prop
           <ActivityIndicator size="small" color={colors.primary[600]} />
         </View>
       )}
-      
+
       {hasError ? (
         <View style={[styles.errorContainer, { width, height }]}>
           <View style={styles.errorBackground} />
@@ -53,8 +55,17 @@ export default function ImageWithLoading({ source, style, width, height, ...prop
           ]}
           onLoad={onLoad}
           onError={onError}
-          {...props}
+          resizeMode="cover"
         />
+        // If you want to try expo-image for better caching:
+        // <Image
+        //   source={source}
+        //   style={[style, { width, height, opacity }]}
+        //   onLoad={onLoad}
+        //   onError={onError}
+        //   contentFit="cover"
+        //   transition={300}
+        // />
       )}
     </View>
   );
@@ -83,4 +94,4 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: colors.gray[200],
   },
-}); 
+});
