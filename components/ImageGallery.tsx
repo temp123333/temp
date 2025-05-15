@@ -7,12 +7,10 @@ import {
   Dimensions,
   TouchableOpacity,
   Modal,
-  TouchableWithoutFeedback,
   StatusBar,
-  Animated,
 } from 'react-native';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const ITEM_WIDTH = width - 48;
 const ITEM_HEIGHT = 220;
 
@@ -22,13 +20,16 @@ interface ImageGalleryProps {
 
 export default function ImageGallery({ images }: ImageGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const flatListRef = useRef<FlatList>(null);
+  const [showModal, setShowModal] = useState(false);
+  const galleryRef = useRef<FlatList>(null);
+  const modalRef = useRef<FlatList>(null);
 
   const handlePress = (index: number) => {
     setActiveIndex(index);
-    setSelectedImage(images[index]);
-    flatListRef.current?.scrollToIndex({ index, animated: true });
+    setShowModal(true);
+    setTimeout(() => {
+      modalRef.current?.scrollToIndex({ index, animated: false });
+    }, 0);
   };
 
   const handleScroll = (event: any) => {
@@ -37,63 +38,89 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
     setActiveIndex(index);
   };
 
+  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      setActiveIndex(viewableItems[0].index);
+    }
+  }).current;
+
   return (
     <View style={styles.container}>
-      {selectedImage && <StatusBar hidden={true} />}
+      {showModal && <StatusBar hidden={true} />}
 
-      {/* Full Screen Modal */}
-      <Modal visible={!!selectedImage} transparent={false} animationType="fade">
-        <TouchableWithoutFeedback onPress={() => setSelectedImage(null)}>
-          <View style={styles.modalContainer}>
-            <Image source={{ uri: selectedImage ?? '' }} style={styles.fullScreenImage} resizeMode="contain" />
-          </View>
-        </TouchableWithoutFeedback>
+      {/* Full Screen Swipeable Modal */}
+      <Modal visible={showModal} transparent={false} animationType="fade">
+        <StatusBar hidden />
+        <FlatList
+          ref={modalRef}
+          data={images}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, index) => `full-${index}`}
+          initialScrollIndex={activeIndex}
+          onMomentumScrollEnd={(e) => {
+            const index = Math.round(e.nativeEvent.contentOffset.x / width);
+            setActiveIndex(index);
+          }}
+          getItemLayout={(_, index) => ({
+            length: width,
+            offset: width * index,
+            index,
+          })}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.fullScreenItem}
+              activeOpacity={1}
+              onPress={() => setShowModal(false)}
+            >
+              <Image source={{ uri: item }} style={styles.fullScreenImage} resizeMode="contain" />
+            </TouchableOpacity>
+          )}
+        />
       </Modal>
 
-      {!selectedImage && (
-        <>
-          <FlatList
-            ref={flatListRef}
-            data={images}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            pagingEnabled
-            snapToInterval={ITEM_WIDTH + 16}
-            decelerationRate="fast"
-            keyExtractor={(_, index) => index.toString()}
-            onScroll={handleScroll}
-            contentContainerStyle={styles.flatListContent}
-            renderItem={({ item, index }) => (
-              <TouchableOpacity onPress={() => setSelectedImage(item)} activeOpacity={0.85}>
-                <View style={styles.imageContainer}>
-                  <Image source={{ uri: item }} style={styles.image} resizeMode="cover" />
-                </View>
-              </TouchableOpacity>
-            )}
-          />
+      {/* Horizontal Image Carousel */}
+      <FlatList
+        ref={galleryRef}
+        data={images}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        pagingEnabled
+        snapToInterval={ITEM_WIDTH + 16}
+        decelerationRate="fast"
+        keyExtractor={(_, index) => index.toString()}
+        onScroll={handleScroll}
+        contentContainerStyle={styles.flatListContent}
+        renderItem={({ item, index }) => (
+          <TouchableOpacity onPress={() => handlePress(index)} activeOpacity={0.85}>
+            <View style={styles.imageContainer}>
+              <Image source={{ uri: item }} style={styles.image} resizeMode="cover" />
+            </View>
+          </TouchableOpacity>
+        )}
+      />
 
-          {/* Thumbnails */}
-          <View style={styles.thumbnailsContainer}>
-            <FlatList
-              data={images}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={(_, index) => `thumb-${index}`}
-              renderItem={({ item, index }) => (
-                <TouchableOpacity
-                  onPress={() => handlePress(index)}
-                  style={[
-                    styles.thumbnail,
-                    activeIndex === index && styles.activeThumbnail,
-                  ]}
-                >
-                  <Image source={{ uri: item }} style={styles.thumbnailImage} />
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </>
-      )}
+      {/* Thumbnail Selector */}
+      <View style={styles.thumbnailsContainer}>
+        <FlatList
+          data={images}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, index) => `thumb-${index}`}
+          renderItem={({ item, index }) => (
+            <TouchableOpacity
+              onPress={() => handlePress(index)}
+              style={[
+                styles.thumbnail,
+                activeIndex === index && styles.activeThumbnail,
+              ]}
+            >
+              <Image source={{ uri: item }} style={styles.thumbnailImage} />
+            </TouchableOpacity>
+          )}
+        />
+      </View>
     </View>
   );
 }
@@ -144,8 +171,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  modalContainer: {
-    flex: 1,
+  fullScreenItem: {
+    width: width,
+    height: height,
     backgroundColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
