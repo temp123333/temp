@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useColorScheme, Platform } from 'react-native';
-import { Home, Map, Compass, Bookmark, User } from 'lucide-react-native';
+import { Chrome as Home, Map, Compass, Bookmark, User } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import { wp, hp } from '@/utils/responsive';
 
