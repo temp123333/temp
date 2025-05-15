@@ -1,8 +1,21 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  Image, 
+  TouchableOpacity,
+  Dimensions,
+  Platform,
+  Linking
+} from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { ArrowLeft, MapPin, Calendar, Clock, TrendingUp, Tent } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Calendar, Clock, TrendingUp, Tent, Map } from 'lucide-react-native';
 import { hiddenTrails } from '@/services/hiddentrails';
+import ImageGallery from '@/components/ImageGallery';
+
+const { width } = Dimensions.get('window');
 
 export default function TrailDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -22,6 +35,18 @@ export default function TrailDetailScreen() {
     );
   }
 
+  const openInMaps = () => {
+    const scheme = Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' });
+    const latLng = `${trail.coordinates.latitude},${trail.coordinates.longitude}`;
+    const label = trail.name;
+    const url = Platform.select({
+      ios: `${scheme}${label}@${latLng}`,
+      android: `${scheme}${latLng}(${label})`
+    });
+
+    Linking.openURL(url);
+  };
+
   return (
     <>
       <Stack.Screen 
@@ -29,20 +54,23 @@ export default function TrailDetailScreen() {
           headerShown: false
         }} 
       />
-      <ScrollView style={styles.container}>
-        <View style={styles.imageContainer}>
-          <Image 
-            source={{ uri: trail.imageUrl }} 
-            style={styles.image}
-            resizeMode="cover"
-          />
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
           <TouchableOpacity 
-            style={styles.backButtonContainer}
+            style={styles.backButton}
             onPress={() => router.back()}
           >
             <ArrowLeft size={24} color="#FFFFFF" />
           </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.mapButton}
+            onPress={openInMaps}
+          >
+            <Map size={24} color="#FFFFFF" />
+          </TouchableOpacity>
         </View>
+
+        <ImageGallery images={trail.images} />
 
         <View style={styles.contentContainer}>
           <Text style={styles.title}>{trail.name}</Text>
@@ -78,6 +106,16 @@ export default function TrailDetailScreen() {
           </View>
 
           <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Highlights</Text>
+            {trail.highlights.map((highlight, index) => (
+              <View key={index} style={styles.highlightItem}>
+                <View style={styles.bullet} />
+                <Text style={styles.highlightText}>{highlight}</Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Difficulty Level</Text>
             <View style={styles.difficultyContainer}>
               <Tent size={20} color="#1E40AF" />
@@ -88,7 +126,10 @@ export default function TrailDetailScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Nearby Attractions</Text>
             {trail.nearbyAttractions.map((attraction, index) => (
-              <Text key={index} style={styles.listItem}>• {attraction}</Text>
+              <View key={index} style={styles.listItem}>
+                <View style={styles.bullet} />
+                <Text style={styles.listText}>{attraction}</Text>
+              </View>
             ))}
           </View>
 
@@ -113,41 +154,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#EF4444',
-    marginBottom: 20,
-    fontFamily: 'Poppins-Medium',
+  header: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 60 : 40,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    zIndex: 10,
   },
   backButton: {
-    backgroundColor: '#1E40AF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  backButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'Poppins-Medium',
-  },
-  imageContainer: {
-    height: 300,
-    position: 'relative',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  backButtonContainer: {
-    position: 'absolute',
-    top: 48,
-    left: 16,
+  mapButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -156,11 +181,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   contentContainer: {
-    padding: 20,
-    marginTop: -20,
-    backgroundColor: '#F8FAFC',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    padding: 16,
   },
   title: {
     fontSize: 24,
@@ -171,13 +192,13 @@ const styles = StyleSheet.create({
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   location: {
     marginLeft: 8,
     fontSize: 16,
-    color: '#64748B',
     fontFamily: 'Poppins-Medium',
+    color: '#64748B',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -198,30 +219,48 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins-Regular',
     color: '#64748B',
     marginTop: 4,
-    fontFamily: 'Poppins-Regular',
   },
   statValue: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     color: '#1E293B',
     marginTop: 2,
-    fontFamily: 'Poppins-SemiBold',
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     color: '#1E293B',
     marginBottom: 12,
-    fontFamily: 'Poppins-SemiBold',
   },
   description: {
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
     color: '#334155',
     lineHeight: 24,
+  },
+  highlightItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  bullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#1E40AF',
+    marginRight: 12,
+  },
+  highlightText: {
+    fontSize: 16,
     fontFamily: 'Poppins-Regular',
+    color: '#334155',
+    flex: 1,
   },
   difficultyContainer: {
     flexDirection: 'row',
@@ -233,14 +272,19 @@ const styles = StyleSheet.create({
   difficultyText: {
     marginLeft: 8,
     fontSize: 16,
-    color: '#1E40AF',
     fontFamily: 'Poppins-Medium',
+    color: '#1E40AF',
   },
   listItem: {
-    fontSize: 16,
-    color: '#334155',
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
+  },
+  listText: {
+    fontSize: 16,
     fontFamily: 'Poppins-Regular',
+    color: '#334155',
+    flex: 1,
   },
   gearContainer: {
     flexDirection: 'row',
@@ -257,7 +301,24 @@ const styles = StyleSheet.create({
   },
   gearText: {
     fontSize: 14,
+    fontFamily: 'Poppins-Medium',
     color: '#1E293B',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#EF4444',
+    marginBottom: 20,
+    fontFamily: 'Poppins-Medium',
+  },
+  backButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
     fontFamily: 'Poppins-Medium',
   },
 });
