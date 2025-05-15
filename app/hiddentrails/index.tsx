@@ -1,43 +1,53 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Platform } from 'react-native';
 import { Stack, router } from 'expo-router';
-import { MapPin, Clock, TrendingUp } from 'lucide-react-native';
+import { MapPin, Clock, TrendingUp, Star, ChevronRight } from 'lucide-react-native';
 import { hiddenTrails } from '@/services/hiddentrails';
 
 export default function HiddenTrailsScreen() {
-  const renderTrailCard = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.card}
+  const renderTrailCard = ({ item }: { item: HiddenTrail }) => (
+    <TouchableOpacity
+      style={[styles.card, { borderLeftColor: getDifficultyColor(item.difficulty) }]}
       onPress={() => router.push(`/hiddentrails/${item.id}`)}
       activeOpacity={0.9}
     >
-      <Image source={{ uri: item.imageUrl }} style={styles.image} />
-      <View style={styles.overlay} />
-      
-      <View style={styles.content}>
-        <Text style={styles.title}>{item.name}</Text>
-        
-        <View style={styles.locationContainer}>
-          <MapPin size={16} color="#FFFFFF" />
+      <View style={styles.cardContent}>
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>{item.name}</Text>
+          {item.featured && (
+            <View style={styles.featuredBadge}>
+              <Star size={14} color="#fff" fill="#fff" />
+              <Text style={styles.featuredText}>Featured</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.locationRow}>
+          <MapPin size={16} color="#64748B" />
           <Text style={styles.location}>{item.location}</Text>
         </View>
 
-        <View style={styles.statsContainer}>
+        <View style={styles.statsRow}>
           <View style={styles.stat}>
-            <Clock size={14} color="#FFFFFF" />
+            <Clock size={16} color="#64748B" />
             <Text style={styles.statText}>{item.duration}</Text>
           </View>
-          
-          <View style={styles.statDivider} />
-          
+
           <View style={styles.stat}>
-            <TrendingUp size={14} color="#FFFFFF" />
+            <TrendingUp size={16} color="#64748B" />
             <Text style={styles.statText}>{item.elevationGain}</Text>
           </View>
         </View>
 
-        <View style={styles.difficultyBadge}>
-          <Text style={styles.difficultyText}>{item.difficulty}</Text>
+        <View style={styles.footerRow}>
+          <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(item.difficulty) }]}>
+            <Text style={styles.difficultyText}>{item.difficulty}</Text>
+          </View>
+
+          <View style={styles.ctaContainer}>
+            <Text style={styles.ctaText}>Explore Trail</Text>
+            <ChevronRight size={18} color="#3B82F6" />
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -45,112 +55,196 @@ export default function HiddenTrailsScreen() {
 
   return (
     <>
-      <Stack.Screen 
-        options={{ 
+      <Stack.Screen
+        options={{
           title: 'Hidden Trails',
-          headerStyle: {
-            backgroundColor: '#F8FAFC',
-          },
+          headerStyle: { backgroundColor: '#FFFFFF' },
           headerTitleStyle: {
             fontFamily: 'Poppins-SemiBold',
-            fontSize: 20,
+            fontSize: 24,
+            color: '#0F172A',
+            letterSpacing: 0.5,
           },
           headerShadowVisible: false,
-        }} 
+        }}
       />
-      
       <FlatList
         data={hiddenTrails}
         renderItem={renderTrailCard}
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <View style={styles.headerContainer}>
+            <Text style={styles.listHeader}>Hidden Trails</Text>
+            <Text style={styles.subHeader}>Explore offbeat trails, filtered by difficulty</Text>
+          </View>
+        }
       />
     </>
   );
 }
 
+const getDifficultyColor = (difficulty: string) => {
+  switch (difficulty.toLowerCase()) {
+    case 'easy': 
+      return '#10B981';     // Emerald
+    case 'moderate': 
+      return '#F59E0B';     // Amber
+    case 'hard': 
+    case 'challenging':     // treat 'challenging' as red
+      return '#EF4444';     // Red
+    case 'expert': 
+      return '#7C3AED';     // Purple
+    default: 
+      return '#3B82F6';     // Blue
+  }
+};
+
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    paddingBottom: 100,
+    paddingHorizontal: 20,
+    paddingBottom: 32,
+    backgroundColor: '#F8FAFC',
+  },
+  headerContainer: {
+    marginBottom: 20,
+    paddingTop: 24,
+  },
+  listHeader: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 34,
+    marginTop: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    letterSpacing: 0.5,
+    marginBottom: 6,
+    textTransform: 'capitalize',
+    fontWeight: '600',
+    fontStyle: 'normal',
+    color: '#0F172A',
+    lineHeight: 40,
+  },
+  subHeader: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 16,
+    color: '#64748B',
+    textAlign: 'center',
+    fontWeight: '400',
+    fontStyle: 'normal',
+    marginBottom: 10,
+    marginTop: 6,
+    lineHeight: 22,
+    letterSpacing: 0.15,
   },
   card: {
-    height: 280,
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginBottom: 16,
+    borderRadius: 18,
+    marginBottom: 24,
     backgroundColor: '#FFFFFF',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderLeftWidth: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.12,
+        shadowRadius: 14,
+      },
+      android: {
+        elevation: 7,
+        shadowColor: '#000',
+      },
+    }),
   },
-  image: {
-    width: '100%',
-    height: '100%',
+  cardContent: {
+    padding: 20,
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
-  content: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 16,
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   title: {
-    fontSize: 24,
-    fontFamily: 'Poppins-Bold',
-    color: '#FFFFFF',
-    marginBottom: 8,
+    fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#0F172A',
+    flex: 1,
+    marginBottom: 6,
   },
-  locationContainer: {
+  featuredBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 5,
   },
-  location: {
-    fontSize: 14,
-    fontFamily: 'Poppins-Medium',
+  featuredText: {
+    fontSize: 13,
     color: '#FFFFFF',
+    fontFamily: 'Poppins-SemiBold',
     marginLeft: 6,
   },
-  statsContainer: {
+  locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 6,
+    marginBottom: 16,
+  },
+  location: {
+    fontSize: 15,
+    fontFamily: 'Poppins-Regular',
+    color: '#64748B',
+    marginLeft: 10,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
   stat: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   statText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Poppins-Medium',
-    color: '#FFFFFF',
-    marginLeft: 6,
+    color: '#475569',
+    marginLeft: 8,
   },
-  statDivider: {
-    width: 1,
-    height: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    marginHorizontal: 12,
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   difficultyBadge: {
-    position: 'absolute',
-    top: -240,
-    right: 16,
-    backgroundColor: 'rgba(30, 64, 175, 0.9)',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: 16,
   },
   difficultyText: {
-    fontSize: 12,
-    fontFamily: 'Poppins-Medium',
+    fontSize: 13,
+    fontFamily: 'Poppins-Bold',
     color: '#FFFFFF',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  ctaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ctaText: {
+    fontSize: 15,
+    fontFamily: 'Poppins-Medium',
+    color: '#3B82F6',
+    marginRight: 6,
+    textDecorationLine: 'underline',
+    textDecorationColor: '#3B82F6',
+    textDecorationStyle: 'solid',
   },
 });

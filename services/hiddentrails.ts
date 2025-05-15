@@ -30,7 +30,7 @@ export const hiddenTrails: Trail[] = [
       'https://images.pexels.com/photos/4215110/pexels-photo-4215110.jpeg',
       'https://images.pexels.com/photos/4215104/pexels-photo-4215104.jpeg'
     ],
-    difficulty: 'Moderate to Challenging',
+    difficulty: 'Challenging',
     bestSeason: 'March to May, September to November',
     duration: '15-20 days',
     elevationGain: '5,416m at highest point',
@@ -194,5 +194,49 @@ export const hiddenTrails: Trail[] = [
       latitude: 28.2139,
       longitude: 85.5233
     }
+  },
+  {
+  id: 5,
+  name: 'Everest Base Camp Trek',
+  location: 'Khumbu Region, Nepal',
+  description: `The Everest Base Camp Trek is one of the most iconic and challenging treks in the world, offering breathtaking views of Mount Everest and the surrounding Himalayan peaks. This trek takes you through Sherpa villages, Buddhist monasteries, and stunning landscapes.`,
+  images: [
+    'https://images.pexels.com/photos/4170740/pexels-photo-4170740.jpeg',
+    'https://images.pexels.com/photos/4170737/pexels-photo-4170737.jpeg',
+    'https://images.pexels.com/photos/4170739/pexels-photo-4170739.jpeg',
+    'https://images.pexels.com/photos/4170738/pexels-photo-4170738.jpeg'
+  ],
+  difficulty: 'Challenging',
+  bestSeason: 'March to May, September to November',
+  duration: '12-14 days',
+  elevationGain: '5,364m at highest point',
+  nearbyAttractions: [
+    'Kala Patthar',
+    'Namche Bazaar',
+    'Tengboche Monastery',
+    'Sagarmatha National Park',
+    'Khumbu Glacier'
+  ],
+  recommendedGear: [
+    'Warm clothing',
+    'Trekking boots',
+    'Sleeping bag rated for cold',
+    'Trekking poles',
+    'Altitude sickness medication',
+    'Sunglasses and sunscreen'
+  ],
+  trailType: 'High-altitude Trek',
+  highlights: [
+    'Spectacular views of Mount Everest',
+    'Visit Sherpa culture and monasteries',
+    'Trek through Sagarmatha National Park',
+    'Witness stunning sunrise at Kala Patthar',
+    'Experience the thrill of high-altitude trekking'
+  ],
+  coordinates: {
+    latitude: 27.9881,
+    longitude: 86.9250
   }
+}
+
 ];

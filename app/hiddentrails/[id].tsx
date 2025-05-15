@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   View, 
   Text, 
@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   Dimensions,
   Platform,
-  Linking
+  Linking,
+  StatusBar
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { ArrowLeft, MapPin, Calendar, Clock, TrendingUp, Tent, Map } from 'lucide-react-native';
@@ -49,23 +50,13 @@ export default function TrailDetailScreen() {
 
   return (
     <>
-      <Stack.Screen 
-        options={{ 
-          headerShown: false
-        }} 
-      />
+      <Stack.Screen options={{ headerShown: false }} />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <ArrowLeft size={24} color="#FFFFFF" />
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.mapButton}
-            onPress={openInMaps}
-          >
+          <TouchableOpacity style={styles.mapButton} onPress={openInMaps}>
             <Map size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
@@ -156,7 +147,7 @@ const styles = StyleSheet.create({
   },
   header: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 60 : 40,
+    top: Platform.OS === 'ios' ? 60 : StatusBar.currentHeight + 10,
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -168,7 +159,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -176,23 +167,23 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   contentContainer: {
-    padding: 16,
+    padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontFamily: 'Poppins-Bold',
     color: '#1E293B',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 18,
   },
   location: {
     marginLeft: 8,
@@ -205,54 +196,55 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#FFFFFF',
     padding: 16,
-    borderRadius: 12,
-    marginBottom: 24,
-    elevation: 2,
+    borderRadius: 16,
+    marginBottom: 28,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
   },
   statItem: {
     alignItems: 'center',
     flex: 1,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: 'Poppins-Regular',
     color: '#64748B',
-    marginTop: 4,
+    marginTop: 6,
   },
   statValue: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Poppins-SemiBold',
     color: '#1E293B',
     marginTop: 2,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 28,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'Poppins-SemiBold',
     color: '#1E293B',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   description: {
     fontSize: 16,
     fontFamily: 'Poppins-Regular',
     color: '#334155',
-    lineHeight: 24,
+    lineHeight: 26,
   },
   highlightItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
+    alignItems: 'flex-start',
+    marginBottom: 10,
   },
   bullet: {
     width: 6,
     height: 6,
     borderRadius: 3,
+    marginTop: 8,
     backgroundColor: '#1E40AF',
     marginRight: 12,
   },
@@ -265,20 +257,22 @@ const styles = StyleSheet.create({
   difficultyContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EFF6FF',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: '#DBEAFE',
+    padding: 14,
+    borderRadius: 10,
+    borderLeftWidth: 4,
+    borderLeftColor: '#1E40AF',
   },
   difficultyText: {
-    marginLeft: 8,
+    marginLeft: 10,
     fontSize: 16,
     fontFamily: 'Poppins-Medium',
     color: '#1E40AF',
   },
   listItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
+    alignItems: 'flex-start',
+    marginBottom: 10,
   },
   listText: {
     fontSize: 16,
@@ -289,15 +283,15 @@ const styles = StyleSheet.create({
   gearContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    justifyContent: 'flex-start',
   },
   gearItem: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 10,
+    marginBottom: 10,
   },
   gearText: {
     fontSize: 14,
@@ -308,13 +302,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
+    backgroundColor: '#FFF1F2',
   },
   errorText: {
-    fontSize: 18,
-    color: '#EF4444',
-    marginBottom: 20,
+    fontSize: 20,
+    color: '#DC2626',
     fontFamily: 'Poppins-Medium',
+    marginBottom: 16,
   },
   backButtonText: {
     color: '#FFFFFF',

@@ -9,11 +9,12 @@ import {
   Modal,
   TouchableWithoutFeedback,
   StatusBar,
+  Animated,
 } from 'react-native';
 
-const { width, height } = Dimensions.get('window');
-const ITEM_WIDTH = width - 32;
-const ITEM_HEIGHT = 200;
+const { width } = Dimensions.get('window');
+const ITEM_WIDTH = width - 48;
+const ITEM_HEIGHT = 220;
 
 interface ImageGalleryProps {
   images: string[];
@@ -26,11 +27,8 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
 
   const handlePress = (index: number) => {
     setActiveIndex(index);
-    setSelectedImage(images[index]); // open full-screen modal
-    flatListRef.current?.scrollToIndex({
-      index,
-      animated: true,
-    });
+    setSelectedImage(images[index]);
+    flatListRef.current?.scrollToIndex({ index, animated: true });
   };
 
   const handleScroll = (event: any) => {
@@ -41,7 +39,6 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
 
   return (
     <View style={styles.container}>
-      {/* Status bar hidden only when modal is open */}
       {selectedImage && <StatusBar hidden={true} />}
 
       {/* Full Screen Modal */}
@@ -53,7 +50,6 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Image Carousel (Hidden when modal is open) */}
       {!selectedImage && (
         <>
           <FlatList
@@ -62,14 +58,15 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
             horizontal
             showsHorizontalScrollIndicator={false}
             pagingEnabled
-            snapToInterval={ITEM_WIDTH}
+            snapToInterval={ITEM_WIDTH + 16}
             decelerationRate="fast"
             keyExtractor={(_, index) => index.toString()}
             onScroll={handleScroll}
+            contentContainerStyle={styles.flatListContent}
             renderItem={({ item, index }) => (
-              <TouchableOpacity onPress={() => setSelectedImage(item)}>
+              <TouchableOpacity onPress={() => setSelectedImage(item)} activeOpacity={0.85}>
                 <View style={styles.imageContainer}>
-                  <Image source={{ uri: item }} style={styles.image} />
+                  <Image source={{ uri: item }} style={styles.image} resizeMode="cover" />
                 </View>
               </TouchableOpacity>
             )}
@@ -103,33 +100,45 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: 24,
     backgroundColor: '#fff',
+  },
+  flatListContent: {
+    paddingHorizontal: 16,
   },
   imageContainer: {
     width: ITEM_WIDTH,
     height: ITEM_HEIGHT,
-    borderRadius: 12,
+    marginRight: 16,
+    borderRadius: 16,
     overflow: 'hidden',
+    backgroundColor: '#f9fafb',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
   },
   image: {
     width: '100%',
     height: '100%',
   },
   thumbnailsContainer: {
-    marginTop: 8,
+    marginTop: 12,
+    paddingHorizontal: 16,
   },
   thumbnail: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 8,
+    width: 58,
+    height: 58,
+    borderRadius: 12,
+    marginRight: 10,
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: 'transparent',
+    backgroundColor: '#e5e7eb',
   },
   activeThumbnail: {
-    borderColor: '#1E40AF',
+    borderColor: '#2563EB',
   },
   thumbnailImage: {
     width: '100%',
@@ -137,7 +146,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
   },

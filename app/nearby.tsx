@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { getNearbyAttractions } from '@/services/destinationService';
 import { Destination } from '@/types';
 import DestinationListItem from '@/components/DestinationListItem';
-import { ArrowLeft, MapPin } from 'lucide-react-native';
+import { ArrowLeft, MapPin, AlertCircle } from 'lucide-react-native';
+import { colors, spacing, typography, shadows, borderRadius } from '@/constants/theme';
+import Card from '@/components/Card';
+import Skeleton from '@/components/Skeleton';
 
 interface LocationCoords {
   latitude: number;
@@ -15,60 +18,87 @@ interface LocationCoords {
 export default function NearbyScreen() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [userLocation, setUserLocation] = useState<LocationCoords | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
-    loadNearbyPlaces();
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
-  const loadNearbyPlaces = async () => {
+  const loadNearbyPlaces = async (isRefreshing = false) => {
     try {
-      setLoading(true);
+      if (!isRefreshing) setLoading(true);
       setError(null);
-      
+
+      console.log('Requesting location permissions...');
       const { status } = await Location.requestForegroundPermissionsAsync();
+      console.log('Location permission status:', status);
+
       if (status !== 'granted') {
         setError('Location permission is required to find nearby places');
+        setLoading(false);
+        setRefreshing(false);
         return;
       }
 
+      console.log('Getting current position...');
       const location = await Location.getCurrentPositionAsync({});
+      console.log('Current position:', location.coords);
+
       setUserLocation({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude
       });
 
+      console.log('Fetching nearby attractions...');
       const nearby = await getNearbyAttractions(
         location.coords.latitude,
         location.coords.longitude
       );
+      console.log('Nearby attractions found:', nearby.length);
       setDestinations(nearby);
     } catch (error) {
+      console.error('Error in loadNearbyPlaces:', error);
       setError('Failed to load nearby places. Please try again.');
-      console.error('Error loading nearby places:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    loadNearbyPlaces(true);
+  }, []);
+
+  useEffect(() => {
+    loadNearbyPlaces();
+  }, []);
+
   const calculateDistance = (dest: Destination): string => {
     if (!userLocation) return '';
-    
-    const R = 6371; // Earth's radius in km
+
+    const R = 6371;
     const dLat = toRad(dest.coordinates.latitude - userLocation.latitude);
     const dLon = toRad(dest.coordinates.longitude - userLocation.longitude);
     const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.sin(dLat / 2) ** 2 +
       Math.cos(toRad(userLocation.latitude)) *
       Math.cos(toRad(dest.coordinates.latitude)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.sin(dLon / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
-    
-    return distance < 1 ? 
-      `${(distance * 1000).toFixed(0)}m away` : 
+
+    return distance < 1 ?
+      `${(distance * 1000).toFixed(0)}m away` :
       `${distance.toFixed(1)}km away`;
   };
 
@@ -76,20 +106,40 @@ export default function NearbyScreen() {
     return degrees * (Math.PI / 180);
   };
 
+  const renderLoadingSkeleton = () => (
+    <View style={styles.skeletonContainer}>
+      {[1, 2, 3].map((key) => (
+        <View key={key} style={styles.skeletonItem}>
+          <Skeleton width={120} height={120} borderRadius={borderRadius.lg} />
+          <View style={styles.skeletonContent}>
+            <Skeleton width={200} height={20} style={{ marginBottom: 8 }} />
+            <Skeleton width={150} height={16} />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1E40AF" />
-        <Text style={styles.loadingText}>Finding nearby places...</Text>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <ArrowLeft size={24} color={colors.gray[800]} />
+          </TouchableOpacity>
+          <Text style={styles.title}>Nearby Places</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        {renderLoadingSkeleton()}
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color="#1E293B" />
+          <ArrowLeft size={24} color={colors.gray[800]} />
         </TouchableOpacity>
         <Text style={styles.title}>Nearby Places</Text>
         <View style={{ width: 24 }} />
@@ -97,30 +147,39 @@ export default function NearbyScreen() {
 
       {error ? (
         <View style={styles.errorContainer}>
+          <AlertCircle size={48} color={colors.error.main} style={{ marginBottom: spacing.md }} />
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadNearbyPlaces}>
+          <TouchableOpacity style={styles.retryButton} onPress={() => loadNearbyPlaces()}>
             <Text style={styles.retryText}>Try Again</Text>
           </TouchableOpacity>
         </View>
       ) : (
         <>
-          <View style={styles.statsContainer}>
-            <MapPin size={20} color="#1E40AF" />
+          <Card style={styles.statsCard}>
+            <MapPin size={20} color={colors.primary[600]} />
             <Text style={styles.statsText}>
               Found {destinations.length} places near you
             </Text>
-          </View>
+          </Card>
 
           <FlatList
             data={destinations}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <View style={styles.destinationContainer}>
+              <Card style={styles.destinationCard} onPress={() => router.push(`/destination/${item.id}`)}>
                 <DestinationListItem destination={item} />
                 <Text style={styles.distanceText}>{calculateDistance(item)}</Text>
-              </View>
+              </Card>
             )}
             contentContainerStyle={styles.list}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={colors.primary[600]}
+                colors={[colors.primary[600]]}
+              />
+            }
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>No nearby places found</Text>
@@ -130,112 +189,101 @@ export default function NearbyScreen() {
           />
         </>
       )}
-    </View>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 16,
-    color: '#64748B',
-    marginTop: 16,
+    backgroundColor: colors.gray[50],
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.md,
     paddingTop: 60,
-    paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    paddingBottom: spacing.md,
+    backgroundColor: colors.gray[50],
+    ...shadows.sm,
   },
   backButton: {
-    padding: 8,
-    marginLeft: -8,
+    padding: spacing.sm,
+    marginLeft: -spacing.sm,
   },
   title: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 20,
-    color: '#1E293B',
+    ...typography.h3,
+    color: colors.gray[800],
   },
-  statsContainer: {
+  statsCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#EFF6FF',
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 12,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.md,
+    backgroundColor: colors.primary[50],
   },
   statsText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 14,
-    color: '#1E40AF',
-    marginLeft: 8,
+    ...typography.subtitle2,
+    color: colors.primary[600],
+    marginLeft: spacing.sm,
   },
   list: {
-    padding: 16,
+    padding: spacing.md,
   },
-  destinationContainer: {
-    marginBottom: 16,
+  destinationCard: {
+    marginBottom: spacing.md,
   },
   distanceText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 12,
-    color: '#1E40AF',
+    ...typography.caption,
+    color: colors.primary[600],
     textAlign: 'right',
-    marginTop: 4,
-    marginRight: 16,
+    marginTop: spacing.xs,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: spacing.xl,
   },
   errorText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 16,
-    color: '#EF4444',
+    ...typography.subtitle1,
+    color: colors.error.main,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   retryButton: {
-    backgroundColor: '#1E40AF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: colors.primary[600],
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
   },
   retryText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 14,
-    color: '#FFFFFF',
+    color: colors.gray[50],
+    ...typography.button,
   },
   emptyContainer: {
+    marginTop: 60,
     alignItems: 'center',
-    padding: 24,
   },
   emptyText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 18,
-    color: '#1E293B',
-    marginBottom: 8,
+    ...typography.subtitle1,
+    color: colors.gray[500],
+    marginBottom: spacing.xs,
   },
   emptySubtext: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 14,
-    color: '#64748B',
+    ...typography.caption,
+    color: colors.gray[400],
+  },
+  skeletonContainer: {
+    padding: spacing.md,
+  },
+  skeletonItem: {
+    flexDirection: 'row',
+    marginBottom: spacing.md,
+  },
+  skeletonContent: {
+    marginLeft: spacing.md,
+    justifyContent: 'center',
   },
 });
