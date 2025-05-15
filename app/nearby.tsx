@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity, Animated, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { getNearbyAttractions } from '@/services/destinationService';
 import { Destination } from '@/types';
 import DestinationListItem from '@/components/DestinationListItem';
-import { ArrowLeft, MapPin, AlertCircle } from 'lucide-react-native';
+import { ArrowLeft, MapPin, AlertCircle, Compass, Frown } from 'lucide-react-native';
 import { colors, spacing, typography, shadows, borderRadius } from '@/constants/theme';
 import Card from '@/components/Card';
 import Skeleton from '@/components/Skeleton';
@@ -24,6 +24,7 @@ export default function NearbyScreen() {
   const router = useRouter();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const headerScrollY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -33,41 +34,37 @@ export default function NearbyScreen() {
     }).start();
   }, []);
 
+  const headerOpacity = headerScrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
   const loadNearbyPlaces = async (isRefreshing = false) => {
     try {
       if (!isRefreshing) setLoading(true);
       setError(null);
 
-      console.log('Requesting location permissions...');
       const { status } = await Location.requestForegroundPermissionsAsync();
-      console.log('Location permission status:', status);
-
       if (status !== 'granted') {
-        setError('Location permission is required to find nearby places');
-        setLoading(false);
-        setRefreshing(false);
+        setError('Location access required to find nearby places');
         return;
       }
 
-      console.log('Getting current position...');
       const location = await Location.getCurrentPositionAsync({});
-      console.log('Current position:', location.coords);
-
       setUserLocation({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude
       });
 
-      console.log('Fetching nearby attractions...');
       const nearby = await getNearbyAttractions(
         location.coords.latitude,
         location.coords.longitude
       );
-      console.log('Nearby attractions found:', nearby.length);
       setDestinations(nearby);
     } catch (error) {
-      console.error('Error in loadNearbyPlaces:', error);
-      setError('Failed to load nearby places. Please try again.');
+      console.error('Error loading nearby places:', error);
+      setError('Failed to load nearby places');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -84,7 +81,7 @@ export default function NearbyScreen() {
   }, []);
 
   const calculateDistance = (dest: Destination): string => {
-    if (!userLocation) return '';
+    if (!userLocation) return 'Calculating...';
 
     const R = 6371;
     const dLat = toRad(dest.coordinates.latitude - userLocation.latitude);
@@ -108,14 +105,17 @@ export default function NearbyScreen() {
 
   const renderLoadingSkeleton = () => (
     <View style={styles.skeletonContainer}>
-      {[1, 2, 3].map((key) => (
-        <View key={key} style={styles.skeletonItem}>
-          <Skeleton width={120} height={120} borderRadius={borderRadius.lg} />
+      {[1, 2, 3, 4].map((key) => (
+        <Card key={key} style={styles.skeletonCard}>
           <View style={styles.skeletonContent}>
-            <Skeleton width={200} height={20} style={{ marginBottom: 8 }} />
-            <Skeleton width={150} height={16} />
+            <Skeleton width={80} height={80} borderRadius={borderRadius.lg} />
+            <View style={styles.skeletonTextContainer}>
+              <Skeleton width={180} height={18} style={{ marginBottom: 8 }} />
+              <Skeleton width={140} height={14} style={{ marginBottom: 6 }} />
+              <Skeleton width={100} height={14} />
+            </View>
           </View>
-        </View>
+        </Card>
       ))}
     </View>
   );
@@ -123,11 +123,16 @@ export default function NearbyScreen() {
   if (loading) {
     return (
       <View style={styles.container}>
+        <StatusBar barStyle="dark-content" />
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity 
+            onPress={() => router.back()} 
+            style={styles.backButton}
+            activeOpacity={0.8}
+          >
             <ArrowLeft size={24} color={colors.gray[800]} />
           </TouchableOpacity>
-          <Text style={styles.title}>Nearby Places</Text>
+          <Text style={styles.title}>Discover Nearby</Text>
           <View style={{ width: 24 }} />
         </View>
         {renderLoadingSkeleton()}
@@ -137,38 +142,68 @@ export default function NearbyScreen() {
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+      <StatusBar barStyle="dark-content" />
+      
+      <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
+        <TouchableOpacity 
+          onPress={() => router.back()} 
+          style={styles.backButton}
+          activeOpacity={0.8}
+        >
           <ArrowLeft size={24} color={colors.gray[800]} />
         </TouchableOpacity>
-        <Text style={styles.title}>Nearby Places</Text>
+        <Text style={styles.title}>Discover Nearby</Text>
         <View style={{ width: 24 }} />
-      </View>
+      </Animated.View>
 
       {error ? (
         <View style={styles.errorContainer}>
-          <AlertCircle size={48} color={colors.error.main} style={{ marginBottom: spacing.md }} />
+          <AlertCircle size={48} color={colors.error.main} style={styles.errorIcon} />
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={() => loadNearbyPlaces()}>
-            <Text style={styles.retryText}>Try Again</Text>
+          <TouchableOpacity 
+            style={styles.retryButton} 
+            onPress={() => loadNearbyPlaces()}
+            activeOpacity={0.8}
+          >
+            <Compass size={18} color={colors.white} style={{ marginRight: 8 }} />
+            <Text style={styles.retryText}>Refresh Locations</Text>
           </TouchableOpacity>
         </View>
       ) : (
         <>
-          <Card style={styles.statsCard}>
-            <MapPin size={20} color={colors.primary[600]} />
-            <Text style={styles.statsText}>
-              Found {destinations.length} places near you
-            </Text>
-          </Card>
+          <Animated.View style={[styles.statsContainer, { 
+            transform: [{
+              translateY: headerScrollY.interpolate({
+                inputRange: [0, 100],
+                outputRange: [0, -50],
+                extrapolate: 'clamp'
+              })
+            }]
+          }]}>
+            <Card style={styles.statsCard}>
+              <View style={styles.statsContent}>
+                <View style={styles.locationPin}>
+                  <MapPin size={20} color={colors.white} />
+                </View>
+                <Text style={styles.statsText}>
+                  {destinations.length} places near you
+                </Text>
+              </View>
+            </Card>
+          </Animated.View>
 
           <FlatList
             data={destinations}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <Card style={styles.destinationCard} onPress={() => router.push(`/destination/${item.id}`)}>
+              <Card 
+                style={styles.destinationCard} 
+                onPress={() => router.push(`/destination/${item.id}`)}
+              >
                 <DestinationListItem destination={item} />
-                <Text style={styles.distanceText}>{calculateDistance(item)}</Text>
+                <View style={styles.distanceBadge}>
+                  <Text style={styles.distanceText}>{calculateDistance(item)}</Text>
+                </View>
               </Card>
             )}
             contentContainerStyle={styles.list}
@@ -182,10 +217,16 @@ export default function NearbyScreen() {
             }
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No nearby places found</Text>
-                <Text style={styles.emptySubtext}>Try expanding your search area</Text>
+                <Frown size={48} color={colors.gray[400]} style={styles.emptyIcon} />
+                <Text style={styles.emptyText}>No places found nearby</Text>
+                <Text style={styles.emptySubtext}>Try again later or explore other areas</Text>
               </View>
             }
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: headerScrollY } } }],
+              { useNativeDriver: false }
+            )}
+            scrollEventThrottle={16}
           />
         </>
       )}
@@ -199,46 +240,83 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[50],
   },
   header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingTop: 60,
-    paddingBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight + 16 : 60,
+    paddingBottom: spacing.lg,
     backgroundColor: colors.gray[50],
-    ...shadows.sm,
   },
   backButton: {
-    padding: spacing.sm,
-    marginLeft: -spacing.sm,
+    padding: spacing.xs,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.gray[100],
   },
   title: {
-    ...typography.h3,
-    color: colors.gray[800],
+    ...typography.h4,
+    fontWeight: '700',
+    color: colors.gray[900],
+  },
+  statsContainer: {
+    position: 'absolute',
+    top: 100,
+    left: 0,
+    right: 0,
+    zIndex: 5,
+    paddingHorizontal: spacing.lg,
   },
   statsCard: {
+    backgroundColor: colors.primary[600],
+    borderRadius: borderRadius.xl,
+    padding: spacing.md,
+  },
+  statsContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: spacing.md,
-    marginTop: spacing.md,
-    backgroundColor: colors.primary[50],
+  },
+  locationPin: {
+    backgroundColor: colors.primary[700],
+    padding: spacing.xs,
+    borderRadius: borderRadius.full,
+    marginRight: spacing.sm,
   },
   statsText: {
     ...typography.subtitle2,
-    color: colors.primary[600],
-    marginLeft: spacing.sm,
+    color: colors.white,
+    fontWeight: '600',
   },
   list: {
-    padding: spacing.md,
+    paddingTop: 160,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
   },
   destinationCard: {
     marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+    position: 'relative',
+  },
+  distanceBadge: {
+    position: 'absolute',
+    top: spacing.md,
+    right: spacing.md,
+    backgroundColor: colors.primary[50],
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xxs,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.primary[100],
   },
   distanceText: {
     ...typography.caption,
-    color: colors.primary[600],
-    textAlign: 'right',
-    marginTop: spacing.xs,
+    color: colors.primary[700],
+    fontWeight: '600',
   },
   errorContainer: {
     flex: 1,
@@ -246,44 +324,62 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.xl,
   },
+  errorIcon: {
+    marginBottom: spacing.lg,
+  },
   errorText: {
-    ...typography.subtitle1,
-    color: colors.error.main,
+    ...typography.h5,
+    color: colors.gray[800],
     textAlign: 'center',
     marginBottom: spacing.md,
+    fontWeight: '600',
   },
   retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.primary[600],
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.lg,
+    ...shadows.sm,
   },
   retryText: {
-    color: colors.gray[50],
+    color: colors.white,
     ...typography.button,
+    fontWeight: '600',
   },
   emptyContainer: {
-    marginTop: 60,
+    marginTop: 80,
     alignItems: 'center',
   },
+  emptyIcon: {
+    marginBottom: spacing.lg,
+    opacity: 0.6,
+  },
   emptyText: {
-    ...typography.subtitle1,
-    color: colors.gray[500],
+    ...typography.h6,
+    color: colors.gray[600],
     marginBottom: spacing.xs,
+    fontWeight: '600',
   },
   emptySubtext: {
     ...typography.caption,
     color: colors.gray[400],
   },
   skeletonContainer: {
+    paddingTop: 120,
+    paddingHorizontal: spacing.lg,
+  },
+  skeletonCard: {
+    marginBottom: spacing.md,
     padding: spacing.md,
   },
-  skeletonItem: {
-    flexDirection: 'row',
-    marginBottom: spacing.md,
-  },
   skeletonContent: {
+    flexDirection: 'row',
+  },
+  skeletonTextContainer: {
     marginLeft: spacing.md,
     justifyContent: 'center',
+    flex: 1,
   },
 });

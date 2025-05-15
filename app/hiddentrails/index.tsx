@@ -63,7 +63,7 @@ export default function HiddenTrailsScreen() {
             fontFamily: 'Poppins-SemiBold',
             fontSize: 24,
             color: '#0F172A',
-            letterSpacing: 0.5,
+            
           },
           headerShadowVisible: false,
         }}

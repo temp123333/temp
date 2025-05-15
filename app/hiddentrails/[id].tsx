@@ -1,10 +1,9 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  Image, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
   TouchableOpacity,
   Dimensions,
   Platform,
@@ -26,10 +25,7 @@ export default function TrailDetailScreen() {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>Trail not found</Text>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -53,11 +49,11 @@ export default function TrailDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <ArrowLeft size={24} color="#FFFFFF" />
+          <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()}>
+            <ArrowLeft size={24} color="#FFF" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.mapButton} onPress={openInMaps}>
-            <Map size={24} color="#FFFFFF" />
+          <TouchableOpacity style={styles.headerBtn} onPress={openInMaps}>
+            <Map size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
 
@@ -65,255 +61,223 @@ export default function TrailDetailScreen() {
 
         <View style={styles.contentContainer}>
           <Text style={styles.title}>{trail.name}</Text>
-          
-          <View style={styles.locationContainer}>
-            <MapPin size={16} color="#64748B" />
+
+          <View style={styles.locationRow}>
+            <MapPin size={18} color="#64748B" />
             <Text style={styles.location}>{trail.location}</Text>
           </View>
 
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Clock size={20} color="#1E40AF" />
-              <Text style={styles.statLabel}>Duration</Text>
-              <Text style={styles.statValue}>{trail.duration}</Text>
-            </View>
-
-            <View style={styles.statItem}>
-              <TrendingUp size={20} color="#1E40AF" />
-              <Text style={styles.statLabel}>Elevation</Text>
-              <Text style={styles.statValue}>{trail.elevationGain}</Text>
-            </View>
-
-            <View style={styles.statItem}>
-              <Calendar size={20} color="#1E40AF" />
-              <Text style={styles.statLabel}>Best Season</Text>
-              <Text style={styles.statValue}>{trail.bestSeason}</Text>
-            </View>
+          <View style={styles.statsCard}>
+            <Stat icon={<Clock size={18} color="#1D4ED8" />} label="Duration" value={trail.duration} />
+            <Stat icon={<TrendingUp size={18} color="#1D4ED8" />} label="Elevation" value={trail.elevationGain} />
+            <Stat icon={<Calendar size={18} color="#1D4ED8" />} label="Best Season" value={trail.bestSeason} />
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About the Trail</Text>
-            <Text style={styles.description}>{trail.description}</Text>
-          </View>
+          <Section title="🌿 About the Trail" content={trail.description} />
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Highlights</Text>
-            {trail.highlights.map((highlight, index) => (
-              <View key={index} style={styles.highlightItem}>
-                <View style={styles.bullet} />
-                <Text style={styles.highlightText}>{highlight}</Text>
-              </View>
-            ))}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Difficulty Level</Text>
-            <View style={styles.difficultyContainer}>
-              <Tent size={20} color="#1E40AF" />
-              <Text style={styles.difficultyText}>{trail.difficulty}</Text>
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Nearby Attractions</Text>
-            {trail.nearbyAttractions.map((attraction, index) => (
+          <Section title="✨ Highlights">
+            {trail.highlights.map((item, index) => (
               <View key={index} style={styles.listItem}>
                 <View style={styles.bullet} />
-                <Text style={styles.listText}>{attraction}</Text>
+                <Text style={styles.listText}>{item}</Text>
               </View>
             ))}
-          </View>
+          </Section>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recommended Gear</Text>
-            <View style={styles.gearContainer}>
+          <Section title="🌄 Difficulty Level">
+            <View style={styles.difficultyBox}>
+              <Tent size={18} color="#1D4ED8" />
+              <Text style={styles.difficultyText}>{trail.difficulty}</Text>
+            </View>
+          </Section>
+
+          <Section title="🏞️ Nearby Attractions">
+            {trail.nearbyAttractions.map((item, index) => (
+              <View key={index} style={styles.listItem}>
+                <View style={styles.bullet} />
+                <Text style={styles.listText}>{item}</Text>
+              </View>
+            ))}
+          </Section>
+
+          <Section title="⛰️ Recommended Gear">
+            <View style={styles.gearWrap}>
               {trail.recommendedGear.map((gear, index) => (
                 <View key={index} style={styles.gearItem}>
                   <Text style={styles.gearText}>{gear}</Text>
                 </View>
               ))}
             </View>
-          </View>
+          </Section>
         </View>
       </ScrollView>
     </>
   );
 }
 
+function Stat({ icon, label, value }) {
+  return (
+    <View style={styles.statBox}>
+      {icon}
+      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={styles.statValue}>{value}</Text>
+    </View>
+  );
+}
+
+function Section({ title, content, children }) {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {content && <Text style={styles.sectionText}>{content}</Text>}
+      {children}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F0F9FF',
   },
   header: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 60 : StatusBar.currentHeight + 10,
+    zIndex: 99,
     left: 0,
     right: 0,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    zIndex: 10,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mapButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  headerBtn: {
+    backgroundColor: 'rgba(30,41,59,0.85)',
+    padding: 10,
+    borderRadius: 24,
   },
   contentContainer: {
     padding: 20,
   },
   title: {
     fontSize: 28,
-    fontFamily: 'Poppins-Bold',
-    color: '#1E293B',
-    marginBottom: 10,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 8,
   },
-  locationContainer: {
+  locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 18,
+    marginBottom: 20,
   },
   location: {
-    marginLeft: 8,
-    fontSize: 16,
-    fontFamily: 'Poppins-Medium',
-    color: '#64748B',
+    fontSize: 15,
+    marginLeft: 6,
+    color: '#475569',
   },
-  statsContainer: {
+  statsCard: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     backgroundColor: '#FFFFFF',
-    padding: 16,
     borderRadius: 16,
-    marginBottom: 28,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    marginBottom: 30,
+    justifyContent: 'space-between',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 3,
+    elevation: 5,
   },
-  statItem: {
+  statBox: {
     alignItems: 'center',
     flex: 1,
   },
   statLabel: {
     fontSize: 13,
-    fontFamily: 'Poppins-Regular',
-    color: '#64748B',
-    marginTop: 6,
+    color: '#94A3B8',
+    marginTop: 5,
   },
   statValue: {
     fontSize: 15,
-    fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
     color: '#1E293B',
-    marginTop: 2,
   },
   section: {
     marginBottom: 28,
   },
   sectionTitle: {
     fontSize: 20,
-    fontFamily: 'Poppins-SemiBold',
-    color: '#1E293B',
+    fontWeight: '600',
+    color: '#1E40AF',
     marginBottom: 10,
   },
-  description: {
-    fontSize: 16,
-    fontFamily: 'Poppins-Regular',
+  sectionText: {
+    fontSize: 15,
     color: '#334155',
-    lineHeight: 26,
+    lineHeight: 24,
   },
-  highlightItem: {
+  listItem: {
     flexDirection: 'row',
+    marginBottom: 8,
     alignItems: 'flex-start',
-    marginBottom: 10,
   },
   bullet: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    marginTop: 8,
-    backgroundColor: '#1E40AF',
-    marginRight: 12,
+    marginTop: 7,
+    marginRight: 10,
+    backgroundColor: '#1D4ED8',
   },
-  highlightText: {
-    fontSize: 16,
-    fontFamily: 'Poppins-Regular',
-    color: '#334155',
+  listText: {
+    fontSize: 15,
+    color: 'black',
     flex: 1,
   },
-  difficultyContainer: {
+  difficultyBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#DBEAFE',
+    backgroundColor: '#e',
     padding: 14,
     borderRadius: 10,
     borderLeftWidth: 4,
-    borderLeftColor: '#1E40AF',
+    borderLeftColor: '#1D4ED8',
   },
   difficultyText: {
     marginLeft: 10,
-    fontSize: 16,
-    fontFamily: 'Poppins-Medium',
-    color: '#1E40AF',
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#1D4ED8',
   },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 10,
-  },
-  listText: {
-    fontSize: 16,
-    fontFamily: 'Poppins-Regular',
-    color: '#334155',
-    flex: 1,
-  },
-  gearContainer: {
+  gearWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'flex-start',
+    gap: 10,
   },
   gearItem: {
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#E0F2FE',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    marginRight: 10,
-    marginBottom: 10,
   },
   gearText: {
     fontSize: 14,
-    fontFamily: 'Poppins-Medium',
-    color: '#1E293B',
+    color: 'black',
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#FEF2F2',
     padding: 24,
-    backgroundColor: '#FFF1F2',
   },
   errorText: {
-    fontSize: 20,
+    fontSize: 18,
     color: '#DC2626',
-    fontFamily: 'Poppins-Medium',
-    marginBottom: 16,
+    marginBottom: 10,
   },
   backButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontFamily: 'Poppins-Medium',
   },
 });
