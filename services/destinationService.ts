@@ -122,32 +122,48 @@ It is not just a place to observe but a place to feel—where spirituality, arch
 },
 
   {
-    id: '3',
-    name: 'Pokhara Lakeside',
-    region: 'Pokhara',
-    category: 'nature',
-    description: 'The beautiful Phewa Lake surrounded by restaurants, shops and views of the Annapurna mountain range. The lakeside area is the main tourist hub of Pokhara.',
-    images: [
-      'https://images.pexels.com/photos/1371360/pexels-photo-1371360.jpeg',
-      'https://images.pexels.com/photos/3225529/pexels-photo-3225529.jpeg'
-    ],
-    coordinates: {
-      latitude: 28.2096,
-      longitude: 83.9856
-    },
-    rating: 4.7,
-    duration: 'Half day',
-    price: 'Free',
-    hasAudioGuide: false,
-    howToGetThere: '25 minute drive from Pokhara airport',
-    bestTimeToVisit: 'Year-round',
-    facilities: [
-      'Hotels',
-      'Restaurants',
-      'Boat rentals'
-    ],
-    interests: ['nature', 'photography']
+  id: '3',
+  name: 'Pokhara Lakeside',
+  region: 'Pokhara',
+  category: 'nature',
+  description: `Pokhara Lakeside is a serene and vibrant stretch along the banks of Phewa Lake, Nepal’s second-largest lake, renowned for its calm waters and spectacular mountain reflections. On clear days, the snow-capped peaks of the Annapurna and Machhapuchhre (Fishtail) ranges are mirrored on the lake's surface, creating postcard-perfect views.
+
+The lakeside area is the heart of Pokhara’s tourism, buzzing with colorful cafes, lakeside restaurants, craft shops, yoga studios, and trekking gear stores. Boating on Phewa Lake is a must-do activity — you can row yourself or hire a boatman to visit the iconic Tal Barahi Temple, which rests on a small island in the lake.
+
+During sunrise and sunset, the promenade transforms into a photographer’s paradise, with golden skies, lively music from nearby cafes, and a tranquil ambiance that soothes every traveler. The Lakeside area is also a gateway to paragliding experiences, zip-lining adventures, and hikes to the World Peace Pagoda.
+
+Whether you're looking to relax, shop, meditate, or start an epic Himalayan trek, Pokhara Lakeside has something for every kind of traveler.`,
+  images: [
+    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvE791-AtKENhXZcI0ARvmEUCJbMGeMA9mi3bxMYAp1cK0e-af8A8qaBcn-hjnmvdAiTE&usqp=CAU',
+    'https://images.pexels.com/photos/3225529/pexels-photo-3225529.jpeg',
+    'https://media.istockphoto.com/id/1146517111/photo/colorful-boats-on-phewa-lake-pokhara-nepal.jpg',
+    'https://media.istockphoto.com/id/1137430470/photo/boats-on-phewa-lake-pokhara-nepal.jpg',
+    'https://media.istockphoto.com/id/1137430467/photo/phewa-lake-pokhara-nepal.jpg'
+  ],
+  coordinates: {
+    latitude: 28.2096,
+    longitude: 83.9856
   },
+  rating: 4.7,
+  duration: 'Half day',
+  price: 'Free',
+  hasAudioGuide: false,
+  howToGetThere: `Option 1: Take a 25-minute taxi ride from Pokhara Airport directly to Lakeside.
+Option 2: Use local buses or shared vans from the airport to Lakeside.
+Option 3: If you're arriving from Kathmandu, tourist buses and private vehicles are available, taking approximately 6-8 hours.`,
+  bestTimeToVisit: 'Year-round, but October to April offers the clearest mountain views. Early mornings and late afternoons are ideal for photography and boat rides.',
+  facilities: [
+    'Hotels',
+    'Restaurants',
+    'Boat rentals',
+    'Cafes',
+    'Souvenir shops',
+    'Yoga studios',
+    'Trekking gear stores'
+  ],
+  interests: ['nature', 'photography', 'boating', 'trekking', 'relaxation']
+},
+
   {
     id: '4',
     name: 'Chitwan National Park',

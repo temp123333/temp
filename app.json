@@ -9,9 +9,10 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#87cefa"   // Light blue background color
+      // You can also add an image here if you want:
+      // "image": "./assets/splash.png"
     },
     "ios": {
       "supportsTablet": true
