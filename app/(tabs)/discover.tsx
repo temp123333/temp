@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  FlatList,
   TouchableOpacity,
   ActivityIndicator,
   SafeAreaView,
   StatusBar,
+  StyleSheet,
   Platform,
 } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
@@ -18,6 +17,7 @@ import DestinationListItem from '@/components/DestinationListItem';
 import InterestChip from '@/components/InterestChip';
 import SearchBar from '@/components/SearchBar';
 import FilterModal from '@/components/FilterModal';
+import { FlashList } from '@shopify/flash-list';
 
 export default function DiscoverScreen() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -34,17 +34,15 @@ export default function DiscoverScreen() {
         setIsLoading(true);
         const destinationsData = await getAllDestinations();
         const interestsData = await getInterests();
-
         setDestinations(destinationsData);
         setFilteredDestinations(destinationsData);
         setInterests(interestsData);
       } catch (error) {
-        console.error('Failed to load data:', error);
+        console.error('Data loading failed:', error);
       } finally {
         setIsLoading(false);
       }
     };
-
     loadData();
   }, []);
 
@@ -54,20 +52,19 @@ export default function DiscoverScreen() {
 
   const applyFilters = () => {
     let filtered = destinations;
+    const query = searchQuery.toLowerCase();
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (dest) =>
-          dest.name.toLowerCase().includes(query) ||
-          dest.region.toLowerCase().includes(query) ||
-          dest.description.toLowerCase().includes(query)
+    if (query) {
+      filtered = filtered.filter(dest =>
+        [dest.name, dest.region, dest.description].some(field =>
+          field.toLowerCase().includes(query)
+        )
       );
     }
 
     if (selectedInterests.length > 0) {
-      filtered = filtered.filter((dest) =>
-        dest.interests.some((interest) => selectedInterests.includes(interest))
+      filtered = filtered.filter(dest =>
+        dest.interests.some(i => selectedInterests.includes(i))
       );
     }
 
@@ -75,8 +72,8 @@ export default function DiscoverScreen() {
   };
 
   const handleSelectInterest = (id: string) => {
-    setSelectedInterests((prevSelected) =>
-      prevSelected.includes(id) ? prevSelected.filter((item) => item !== id) : [...prevSelected, id]
+    setSelectedInterests(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
 
@@ -85,8 +82,8 @@ export default function DiscoverScreen() {
   };
 
   const clearAllFilters = () => {
-    setSelectedInterests([]);
     setSearchQuery('');
+    setSelectedInterests([]);
   };
 
   if (isLoading) {
@@ -104,30 +101,33 @@ export default function DiscoverScreen() {
       <View style={styles.container}>
         {/* Header */}
         <Animated.View entering={FadeInDown} style={styles.header}>
-          <Text style={styles.headerTitle}>Explore</Text>
+          <Text style={styles.headerTitle}>Discover</Text>
           <TouchableOpacity style={styles.filterButton} onPress={() => setShowFilters(true)}>
-            <Filter size={22} color="#FFF" />
-            <Text style={styles.filterButtonText}>Filters</Text>
+            <Filter size={20} color="#FFF" />
+            {selectedInterests.length > 0 && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>{selectedInterests.length}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </Animated.View>
 
         {/* Search */}
-        <Animated.View entering={FadeInDown.delay(100)} style={styles.searchContainer}>
-          <SearchBar
-            value={searchQuery}
-            onChangeText={handleSearch}
-            placeholder="Search destinations, regions..."
-            style={styles.searchBar}
-          />
-        </Animated.View>
+        <SearchBar
+          value={searchQuery}
+          onChangeText={handleSearch}
+          placeholder="Search destinations, regions..."
+          style={styles.searchBar}
+        />
 
-        {/* Interests scroll */}
-        <Animated.View entering={FadeInDown.delay(200)} style={styles.interestsContainer}>
-          <FlatList
+        {/* Interests */}
+        <View style={styles.interestsContainer}>
+          <FlashList
             data={interests}
             horizontal
+            estimatedItemSize={80}
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.id}
+            keyExtractor={item => item.id}
             renderItem={({ item }) => (
               <InterestChip
                 interest={item}
@@ -135,41 +135,38 @@ export default function DiscoverScreen() {
                 onSelect={() => handleSelectInterest(item.id)}
               />
             )}
-            contentContainerStyle={styles.interestsList}
+            contentContainerStyle={{ gap: 8, paddingLeft: 8 }}
           />
-        </Animated.View>
+        </View>
 
-        {/* Clear filters */}
+        {/* Clear Filter Button */}
         {selectedInterests.length > 0 && (
-          <Animated.View entering={FadeInDown.delay(300)} style={styles.clearFiltersContainer}>
-            <TouchableOpacity onPress={clearAllFilters} style={styles.clearFiltersButton}>
-              <Text style={styles.clearFiltersText}>Reset Filters</Text>
-            </TouchableOpacity>
-          </Animated.View>
+          <TouchableOpacity style={styles.clearFiltersButton} onPress={clearAllFilters}>
+            <Text style={styles.clearFiltersText}>Clear all filters</Text>
+          </TouchableOpacity>
         )}
 
         {/* Results */}
-        <Animated.View entering={FadeInDown.delay(400)} style={styles.resultsHeader}>
-          <Text style={styles.resultsText}>
-            {filteredDestinations.length} {filteredDestinations.length === 1 ? 'place' : 'places'} found
-          </Text>
-        </Animated.View>
+        <Text style={styles.resultsText}>
+          {filteredDestinations.length} {filteredDestinations.length === 1 ? 'result' : 'results'} found
+        </Text>
 
-        {/* Destination list */}
-        <FlatList
+        {/* Destination List */}
+        <FlashList
           data={filteredDestinations}
-          keyExtractor={(item) => item.id}
+          estimatedItemSize={250}
+          keyExtractor={item => item.id}
           renderItem={({ item, index }) => (
-            <Animated.View entering={FadeInUp.delay(100 * index)}>
+            <Animated.View entering={FadeInUp.delay(50 * index)}>
               <DestinationListItem destination={item} />
             </Animated.View>
           )}
-          contentContainerStyle={styles.destinationsList}
+          contentContainerStyle={{ paddingBottom: 120 }}
           ListEmptyComponent={
-            <Animated.View entering={FadeInUp} style={styles.emptyContainer}>
+            <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>No destinations found</Text>
-              <Text style={styles.emptySubtext}>Try different filters or search terms</Text>
-            </Animated.View>
+              <Text style={styles.emptySubtext}>Try different filters or search terms.</Text>
+            </View>
           }
         />
 
@@ -189,146 +186,128 @@ export default function DiscoverScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FDF6F0', // Warm, creamy background
+    backgroundColor: 'white',
   },
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 10 : 0,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FDF6F0',
-  },
-  loadingText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 16,
-    color: '#FF6B4A',
-    marginTop: 16,
-    letterSpacing: 0.3,
   },
   header: {
     flexDirection: 'row',
+    marginTop: 10,
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingVertical: 12,
+    marginBottom: 14,
   },
   headerTitle: {
-    fontFamily: 'Poppins-ExtraBold',
-    fontSize: 36,
-    color: '#2D2D2D',
-    letterSpacing: -0.5,
-    lineHeight: 44,
+    fontSize: 32,
+    fontFamily: 'Poppins-Bold',
+    color: '#222',
   },
   filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#FF6B4A',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 20,
-    shadowColor: '#FF6B4A',
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 4,
+    padding: 10,
+    borderRadius: 30,
+    position: 'relative',
   },
-  filterButtonText: {
-    color: '#FFF',
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 15,
-    marginLeft: 6,
-    letterSpacing: 0.2,
+  filterBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
   },
-  searchContainer: {
-    marginBottom: 20,
+  filterBadgeText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#FF6B4A',
   },
   searchBar: {
-    backgroundColor: '#FFF',
-    borderRadius: 25,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#EDEDED',
-    shadowColor: '#2D2D2D',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    marginBottom: 12,
   },
   interestsContainer: {
-    height: 60,
-    marginBottom: 16,
-  },
-  interestsList: {
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-  },
-  clearFiltersContainer: {
-    alignItems: 'flex-end',
-    marginBottom: 16,
-  },
-  clearFiltersButton: {
-    backgroundColor: '#FFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#FF6B4A',
-    shadowColor: '#2D2D2D',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  clearFiltersText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 14,
-    color: '#FF6B4A',
-    letterSpacing: 0.3,
-  },
-  resultsHeader: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EDEDED',
-    marginBottom: 16,
-  },
-  resultsText: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 16,
-    color: '#4A4A4A',
-    letterSpacing: 0.2,
-  },
-  destinationsList: {
-    paddingBottom: 120,
-  },
-  emptyContainer: {
-    padding: 32,
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-    borderRadius: 16,
-    marginTop: 16,
-    shadowColor: '#2D2D2D',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
-  },
-  emptyText: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: 20,
-    color: '#2D2D2D',
+    height: 50,
     marginBottom: 8,
   },
-  emptySubtext: {
-    fontFamily: 'Poppins-Regular',
+  clearFiltersButton: {
+    alignSelf: 'flex-end',
+    marginVertical: 8,
+    backgroundColor: '#FF6B4A20',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  clearFiltersText: {
+    fontSize: 13,
+    fontFamily: 'Poppins-Medium',
+    color: '#FF6B4A',
+  },
+  resultsText: {
     fontSize: 14,
-    color: '#6B7280',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#FF6B4A',
+    fontFamily: 'Poppins-Medium',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    marginTop: 32,
+    paddingHorizontal: 16,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#2D2D2D',
+    marginBottom: 6,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#777',
     textAlign: 'center',
-    lineHeight: 20,
+    fontFamily: 'Poppins-Regular',
+  },
+  searchBar: {
+    marginBottom: 16,
+    backgroundColor: '#F7F7F7',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    height: 48,
+    justifyContent: 'center',
+  },
+  searchInput: {
+    fontSize: 16,
+    fontFamily: 'Poppins-Regular',
+    color: '#333',
+    flex: 1,
+    paddingVertical: 0,
+    paddingHorizontal: 8,
+  },
+  searchIcon: {   
+    position: 'absolute',
+    left: 16,
+    top: '50%',
+    transform: [{ translateY: -50 }],
+  },
+  searchButton: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    transform: [{ translateY: -50 }],
+    backgroundColor: '#FF6B4A',
+    padding: 8,
+    borderRadius: 24,
   },
 });
