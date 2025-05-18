@@ -1,0 +1,111 @@
+import { Tabs } from 'expo-router';
+import { useColorScheme, Platform } from 'react-native';
+import { Chrome as Home, Map, Compass, Bookmark, User } from 'lucide-react-native';
+import * as Animatable from 'react-native-animatable';
+import Colors from '@/constants/Colors';
+import { wp, hp } from '@/utils/responsive';
+
+const AnimatedIcon = ({ focused, children }) => {
+  const animation = focused ? 'bounceIn' : undefined;
+  return (
+    <Animatable.View animation={animation} duration={500} useNativeDriver>
+      {children}
+    </Animatable.View>
+  );
+};
+
+export default function TabLayout() {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? 'light'];
+
+  return (
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: theme.tint,
+        tabBarInactiveTintColor: theme.tabIconDefault,
+        tabBarStyle: {
+          position: 'absolute',
+          left: wp(4),
+          right: wp(4),
+          bottom: Platform.OS === 'ios' ? hp(4) : hp(2),
+          height: Platform.OS === 'ios' ? hp(8) : hp(7),
+          backgroundColor: theme.tabBarBackground,
+          borderRadius: 20,
+          borderTopWidth: 0,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOpacity: 0.15,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: -4 },
+        },
+        tabBarItemStyle: {
+          paddingVertical: Platform.OS === 'ios' ? hp(0.5) : 0,
+          height: Platform.OS === 'ios' ? hp(6) : hp(7),
+        },
+        tabBarLabelStyle: {
+          fontFamily: 'Poppins-Medium',
+          fontSize: wp(3),
+          marginTop: Platform.OS === 'android' ? hp(-1) : 0,
+          paddingBottom: Platform.OS === 'android' ? hp(1) : 0,
+        },
+        headerShown: false,
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <Home size={24} color={color} />
+            </AnimatedIcon>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="discover"
+        options={{
+          title: 'Discover',
+          tabBarIcon: ({ color, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <Compass size={24} color={color} />
+            </AnimatedIcon>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: 'Map',
+          tabBarIcon: ({ color, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <Map size={24} color={color} />
+            </AnimatedIcon>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="favorites"
+        options={{
+          title: 'Favorites',
+          tabBarIcon: ({ color, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <Bookmark size={24} color={color} />
+            </AnimatedIcon>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <User size={24} color={color} />
+            </AnimatedIcon>
+          ),
+        }}
+      />
+    </Tabs>
+  );
+}
