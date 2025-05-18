@@ -11,9 +11,9 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => void;
-  signUp: (name: string, email: string, password: string) => void;
-  signOut: () => void;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (name: string, email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,44 +35,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in
-    const loadUser = async () => {
-      try {
-        const userString = await AsyncStorage.getItem('user');
-        if (userString) {
-          const userData = JSON.parse(userString);
-          setUser(userData);
-          router.replace('/(tabs)/Home');
-        } else {
-          router.replace('/(auth)/login');
-        }
-      } catch (error) {
-        console.error('Failed to load user:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadUser();
   }, []);
+
+  const loadUser = async () => {
+    try {
+      const userString = await AsyncStorage.getItem('user');
+      if (userString) {
+        const userData = JSON.parse(userString);
+        setUser(userData);
+      }
+    } catch (error) {
+      console.error('Failed to load user:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      
-      // In a real app, you would validate credentials against a backend
-      // For demo, we'll just create a mock user
       const mockUser: User = {
         id: '1',
         name: 'Demo User',
         email: email,
       };
-      
       await AsyncStorage.setItem('user', JSON.stringify(mockUser));
       setUser(mockUser);
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/Home');
     } catch (error) {
       console.error('Sign in failed:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -81,20 +74,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signUp = async (name: string, email: string, password: string) => {
     try {
       setIsLoading(true);
-      
-      // In a real app, you would register the user with a backend
-      // For demo, we'll just create a mock user
       const mockUser: User = {
         id: '1',
         name: name,
         email: email,
       };
-      
       await AsyncStorage.setItem('user', JSON.stringify(mockUser));
       setUser(mockUser);
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/Home');
     } catch (error) {
       console.error('Sign up failed:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -107,6 +97,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       router.replace('/(auth)/login');
     } catch (error) {
       console.error('Sign out failed:', error);
+      throw error;
     }
   };
 

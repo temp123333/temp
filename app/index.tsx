@@ -17,13 +17,9 @@ export default function Index() {
     }
   }, [user, isLoading]);
 
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#FF6B4A" />
-      </View>
-    );
-  }
-
-  return null;
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" color="#FF6B4A" />
+    </View>
+  );
 }
