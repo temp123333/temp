@@ -157,7 +157,7 @@ export default function HomeScreen() {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Popular Destinations</Text>
           <TouchableOpacity 
-            onPress={() => router.push('/discover')}
+            // onPress={() => router.push('/discover')}
             style={styles.viewAllButton}
             activeOpacity={0.7}
           >
@@ -184,7 +184,7 @@ export default function HomeScreen() {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Nearby Attractions</Text>
           <TouchableOpacity 
-            onPress={() => router.push('/map')}
+            onPress={() => router.push('/navigation/map')}
             style={styles.viewAllButton}
             activeOpacity={0.7}
           >
