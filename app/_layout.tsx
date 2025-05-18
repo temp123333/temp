@@ -1,110 +1,53 @@
-import { Tabs, useRouter } from 'expo-router';
-import { useColorScheme, Platform } from 'react-native';
-import { Chrome as Home, Map, Compass, Bookmark, User } from 'lucide-react-native';
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { AuthProvider } from '@/context/AuthContext';
+import { FavoritesProvider } from '@/context/FavoritesContext';
+import { useFonts } from 'expo-font';
+import {
+  Poppins_400Regular as Poppins_Regular,
+  Poppins_500Medium as Poppins_Medium,
+  Poppins_600SemiBold as Poppins_SemiBold,
+  Poppins_700Bold as Poppins_Bold,
+} from '@expo-google-fonts/poppins';
+import { View, ActivityIndicator } from 'react-native';
 
-import Colors from '@/constants/Colors';
-import { wp, hp } from '@/utils/responsive';
-import { AuthContext } from '@/context/AuthContext';
+export default function RootLayout() {
+  useFrameworkReady();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? 'light'];
-  const authContext = useContext(AuthContext);
-  const user = authContext?.user;
-  const router = useRouter();
+  const [fontsLoaded, fontError] = useFonts({
+    'Poppins-Regular': Poppins_Regular,
+    'Poppins-Medium': Poppins_Medium,
+    'Poppins-SemiBold': Poppins_SemiBold,
+    'Poppins-Bold': Poppins_Bold,
+  });
 
   useEffect(() => {
-    if (!user) {
-      router.replace('/(auth)/login');
+    if (fontError) {
+      console.error('Error loading fonts:', fontError);
     }
-  }, [user]);
+  }, [fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#FF6B4A" />
+      </View>
+    );
+  }
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: theme.tint,
-        tabBarInactiveTintColor: theme.tabIconDefault,
-        tabBarStyle: {
-          position: 'absolute',
-          left: wp(5),
-          right: wp(5),
-          bottom: Platform.OS === 'ios' ? hp(4) : hp(3),
-          height: hp(8),
-          paddingBottom: Platform.OS === 'ios' ? hp(1) : hp(0.5),
-          paddingTop: hp(1),
-          backgroundColor: theme.tabBarBackground,
-          borderRadius: 20,
-          borderTopWidth: 0,
-          elevation: 10,
-          shadowColor: '#000',
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: -4 },
-          zIndex: 999,
-        },
-        tabBarItemStyle: {
-          paddingVertical: hp(0.5),
-          justifyContent: 'center',
-        },
-        tabBarLabelStyle: {
-          fontFamily: 'Poppins-Medium',
-          fontSize: wp(3),
-          marginTop: Platform.OS === 'android' ? hp(0.3) : 0,
-          includeFontPadding: false,
-        },
-        tabBarIconStyle: {
-          marginTop: 0,
-          justifyContent: 'center',
-        },
-        headerShown: false,
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <Home size={24} color={color} fill={focused ? color : 'transparent'} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="discover"
-        options={{
-          title: 'Discover',
-          tabBarIcon: ({ color, focused }) => (
-            <Compass size={24} color={color} fill={focused ? color : 'transparent'} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="map"
-        options={{
-          title: 'Map',
-          tabBarIcon: ({ color, focused }) => (
-            <Map size={24} color={color} fill={focused ? color : 'transparent'} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="favorites"
-        options={{
-          title: 'Favorites',
-          tabBarIcon: ({ color, focused }) => (
-            <Bookmark size={24} color={color} fill={focused ? color : 'transparent'} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, focused }) => (
-            <User size={24} color={color} fill={focused ? color : 'transparent'} />
-          ),
-        }}
-      />
-    </Tabs>
+    <AuthProvider>
+      <FavoritesProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="welcome" />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+        <StatusBar style="auto" />
+      </FavoritesProvider>
+    </AuthProvider>
   );
 }
