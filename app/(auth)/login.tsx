@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { 
   View, 
   Text, 
@@ -24,6 +24,7 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
+  const passwordInputRef = useRef<TextInput>(null);
 
   const handleLogin = async () => {
     Keyboard.dismiss();
@@ -31,7 +32,7 @@ export default function LoginScreen() {
       setError('Please fill in all fields');
       return;
     }
-    
+
     setError('');
     setIsLoading(true);
     try {
@@ -112,7 +113,7 @@ export default function LoginScreen() {
                   importantForAutofill="yes"
                   textContentType="emailAddress"
                   returnKeyType="next"
-                  onSubmitEditing={() => this.passwordInput.focus()}
+                  onSubmitEditing={() => passwordInputRef.current?.focus()}
                 />
               </View>
 
@@ -126,7 +127,7 @@ export default function LoginScreen() {
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry
-                  ref={(input) => this.passwordInput = input}
+                  ref={passwordInputRef}
                   importantForAutofill="yes"
                   textContentType="password"
                   returnKeyType="go"
@@ -217,14 +218,13 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
-marginBottom: 8,
-    includeFontPadding: false, // Android specific
+    marginBottom: 8,
+    includeFontPadding: false,
   },
   subtitle: {
     fontFamily: 'Poppins-Regular',
     fontSize: Platform.OS === 'android' ? 15 : 17,
     color: '#ffffff',
-    marginBottom: 8,
     textAlign: 'center',
     marginTop: Platform.OS === 'android' ? 4 : 6,
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
@@ -243,7 +243,7 @@ marginBottom: 8,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 8, // Android shadow
+    elevation: 8,
     paddingBottom: Platform.OS === 'android' ? 24 : 0,
   },
   formTitle: {
@@ -306,7 +306,7 @@ marginBottom: 8,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
-    elevation: 3, // Android shadow
+    elevation: 3,
   },
   buttonDisabled: {
     opacity: 0.7,
@@ -343,11 +343,11 @@ marginBottom: 8,
     marginTop: 20,
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    elevation: 2, // Android shadow
+    elevation: 2,
   },
   guestButtonText: {
     fontFamily: 'Poppins-Medium',
-    fontSize: 16,
+    fontSize: 15,
     color: '#1E293B',
     includeFontPadding: false,
   },

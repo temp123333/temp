@@ -1,6 +1,9 @@
+// File: app/(tabs)/_layout.tsx
+
 import { Tabs, useRouter } from 'expo-router';
 import { useColorScheme, Platform, ActivityIndicator, View } from 'react-native';
 import { Chrome as Home, Map, Compass, Bookmark, User } from 'lucide-react-native';
+import * as Animatable from 'react-native-animatable';
 import { useEffect } from 'react';
 
 import Colors from '@/constants/Colors';
@@ -34,8 +37,19 @@ export default function TabLayout() {
     );
   }
 
+  // Animated icon wrapper component
+  const AnimatedIcon = ({ focused, children }: { focused: boolean; children: React.ReactNode }) => {
+    const animation = focused ? 'bounceIn' : undefined; // Or try 'zoomIn', 'pulse', etc.
+    return (
+      <Animatable.View animation={animation} duration={500} useNativeDriver>
+        {children}
+      </Animatable.View>
+    );
+  };
+
   return (
     <Tabs
+      initialRouteName="Home"
       screenOptions={{
         tabBarActiveTintColor: theme.tint,
         tabBarInactiveTintColor: theme.tabIconDefault,
@@ -75,11 +89,13 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="Home"
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <Home size={24} color={color} fill={focused ? color : 'transparent'} />
+            <AnimatedIcon focused={focused}>
+              <Home size={24} color={color} />
+            </AnimatedIcon>
           ),
         }}
       />
@@ -88,7 +104,9 @@ export default function TabLayout() {
         options={{
           title: 'Discover',
           tabBarIcon: ({ color, focused }) => (
-            <Compass size={24} color={color} fill={focused ? color : 'transparent'} />
+            <AnimatedIcon focused={focused}>
+              <Compass size={24} color={color} />
+            </AnimatedIcon>
           ),
         }}
       />
@@ -97,7 +115,9 @@ export default function TabLayout() {
         options={{
           title: 'Map',
           tabBarIcon: ({ color, focused }) => (
-            <Map size={24} color={color} fill={focused ? color : 'transparent'} />
+            <AnimatedIcon focused={focused}>
+              <Map size={24} color={color} />
+            </AnimatedIcon>
           ),
         }}
       />
@@ -106,7 +126,9 @@ export default function TabLayout() {
         options={{
           title: 'Favorites',
           tabBarIcon: ({ color, focused }) => (
-            <Bookmark size={24} color={color} fill={focused ? color : 'transparent'} />
+            <AnimatedIcon focused={focused}>
+              <Bookmark size={24} color={color} />
+            </AnimatedIcon>
           ),
         }}
       />
@@ -115,7 +137,9 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, focused }) => (
-            <User size={24} color={color} fill={focused ? color : 'transparent'} />
+            <AnimatedIcon focused={focused}>
+              <User size={24} color={color} />
+            </AnimatedIcon>
           ),
         }}
       />
