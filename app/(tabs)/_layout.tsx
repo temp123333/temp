@@ -1,12 +1,38 @@
-import { Tabs } from 'expo-router';
-import { useColorScheme, Platform } from 'react-native';
+import { Tabs, useRouter } from 'expo-router';
+import { useColorScheme, Platform, ActivityIndicator, View } from 'react-native';
 import { Chrome as Home, Map, Compass, Bookmark, User } from 'lucide-react-native';
+import { useEffect } from 'react';
+
 import Colors from '@/constants/Colors';
 import { wp, hp } from '@/utils/responsive';
+import { useAuth } from '@/context/AuthContext';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'light'];
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace('/(auth)/login');
+    }
+  }, [user, isLoading]);
+
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: theme.background,
+        }}
+      >
+        <ActivityIndicator size="large" color={theme.tint} />
+      </View>
+    );
+  }
 
   return (
     <Tabs

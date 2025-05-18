@@ -16,7 +16,7 @@ interface AuthContextType {
   signOut: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (userString) {
           const userData = JSON.parse(userString);
           setUser(userData);
-          router.replace('/(tabs)');
+          router.replace('/(tabs)/Home');
         } else {
           router.replace('/(auth)/login');
         }

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Ghumne",
-    "slug": "bolt-expo-nativewind",
+    "slug": "Ghumne",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/Flag_of_Nepal.svg.png",
@@ -10,9 +10,7 @@
     "newArchEnabled": true,
     "splash": {
       "resizeMode": "contain",
-      "backgroundColor": "#87cefa"   // Light blue background color
-      // You can also add an image here if you want:
-      // "image": "./assets/splash.png"
+      "backgroundColor": "#87cefa"   
     },
     "ios": {
       "supportsTablet": true
