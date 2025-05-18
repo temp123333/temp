@@ -1,5 +1,3 @@
-// File: app/(tabs)/_layout.tsx
-
 import { Tabs, useRouter } from 'expo-router';
 import { useColorScheme, Platform, ActivityIndicator, View } from 'react-native';
 import { Chrome as Home, Map, Compass, Bookmark, User } from 'lucide-react-native';
@@ -24,22 +22,19 @@ export default function TabLayout() {
 
   if (isLoading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: theme.background,
-        }}
-      >
+      <View style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: theme.background,
+      }}>
         <ActivityIndicator size="large" color={theme.tint} />
       </View>
     );
   }
 
-  // Animated icon wrapper component
   const AnimatedIcon = ({ focused, children }: { focused: boolean; children: React.ReactNode }) => {
-    const animation = focused ? 'bounceIn' : undefined; // Or try 'zoomIn', 'pulse', etc.
+    const animation = focused ? 'bounceIn' : undefined;
     return (
       <Animatable.View animation={animation} duration={500} useNativeDriver>
         {children}
@@ -49,41 +44,35 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      initialRouteName="Home"
       screenOptions={{
         tabBarActiveTintColor: theme.tint,
         tabBarInactiveTintColor: theme.tabIconDefault,
         tabBarStyle: {
           position: 'absolute',
-          left: wp(5),
-          right: wp(5),
-          bottom: Platform.OS === 'ios' ? hp(4) : hp(3),
-          height: hp(8),
-          paddingBottom: Platform.OS === 'ios' ? hp(1) : hp(0.5),
-          paddingTop: hp(1),
+          left: wp(4),
+          right: wp(4),
+          bottom: Platform.OS === 'ios' ? hp(4) : hp(2),
+          height: Platform.OS === 'ios' ? hp(8) : hp(7),
+          paddingBottom: Platform.OS === 'ios' ? hp(1) : 0,
+          paddingTop: Platform.OS === 'ios' ? hp(1) : 0,
           backgroundColor: theme.tabBarBackground,
           borderRadius: 20,
           borderTopWidth: 0,
-          elevation: 10,
+          elevation: 8,
           shadowColor: '#000',
           shadowOpacity: 0.15,
           shadowRadius: 12,
           shadowOffset: { width: 0, height: -4 },
-          zIndex: 999,
         },
         tabBarItemStyle: {
-          paddingVertical: hp(0.5),
-          justifyContent: 'center',
+          paddingVertical: Platform.OS === 'ios' ? hp(0.5) : 0,
+          height: Platform.OS === 'ios' ? hp(6) : hp(7),
         },
         tabBarLabelStyle: {
           fontFamily: 'Poppins-Medium',
           fontSize: wp(3),
-          marginTop: Platform.OS === 'android' ? hp(0.3) : 0,
-          includeFontPadding: false,
-        },
-        tabBarIconStyle: {
-          marginTop: 0,
-          justifyContent: 'center',
+          marginTop: Platform.OS === 'android' ? hp(-1) : 0,
+          paddingBottom: Platform.OS === 'android' ? hp(1) : 0,
         },
         headerShown: false,
       }}
