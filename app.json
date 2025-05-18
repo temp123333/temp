@@ -1,19 +1,26 @@
 {
   "expo": {
     "name": "Ghumne",
-    "slug": "Ghumne",
+    "slug": "ghumne",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/Flag_of_Nepal.svg.png",
+    "icon": "./assets/Flag_of_Nepal.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "splash": {
+      "image":"./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#87cefa"   
+      "backgroundColor": "#87cefa"
     },
     "ios": {
       "supportsTablet": true
+    },
+    "android": {
+      "package": "com.amritsapkota.exponative",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -31,11 +38,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "1ea82f60-9200-4eb9-ae42-db99eb73053b"
+        "projectId": "11ced189-46fa-46c9-8208-caa1a1945f50"
       }
     },
-    "android": {
-      "package": "com.amritsapkota.exponative"
-    }
+    "owner": "amritsapkota"
   }
 }
