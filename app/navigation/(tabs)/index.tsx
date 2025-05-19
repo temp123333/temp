@@ -79,7 +79,9 @@ export default function HomeScreen() {
           'To show you nearby attractions, we need access to your location. You can enable it in your device settings.',
           [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Location.openSettings() }
+            { text: 'Open Settings', 
+              // onPress: () => Location.openSettings() 
+            }
           ]
         );
       }

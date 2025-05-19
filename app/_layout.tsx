@@ -11,7 +11,7 @@ import {
   Poppins_600SemiBold as Poppins_SemiBold,
   Poppins_700Bold as Poppins_Bold,
 } from '@expo-google-fonts/poppins';
-import { View, ActivityIndicator, Platform } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 
 export default function RootLayout() {
   useFrameworkReady();
@@ -44,11 +44,8 @@ export default function RootLayout() {
           <Stack.Screen name="index" />
           <Stack.Screen name="welcome" />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          {Platform.OS === 'ios' ? (
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          ) : (
-            <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-          )}
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="auto" />
       </FavoritesProvider>

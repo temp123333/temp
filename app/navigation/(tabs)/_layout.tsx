@@ -2,7 +2,7 @@ import { Tabs, useRouter } from 'expo-router';
 import { useColorScheme, Platform, ActivityIndicator, View } from 'react-native';
 import { Chrome as Home, Map, Compass, Bookmark, User } from 'lucide-react-native';
 import * as Animatable from 'react-native-animatable';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react'; // Import useState
 
 import Colors from '@/constants/Colors';
 import { wp, hp } from '@/utils/responsive';
@@ -13,12 +13,16 @@ export default function TabLayout() {
   const theme = Colors[colorScheme ?? 'light'];
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const [isReady, setIsReady] = useState(false); // New state variable
 
   useEffect(() => {
     if (!isLoading && !user) {
       router.replace('/(auth)/login');
+      setIsReady(false); // Ensure Tabs don't render before redirect
+    } else {
+      setIsReady(true); // Only allow Tabs to render after auth check
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, router]);
 
   if (isLoading) {
     return (
@@ -41,6 +45,11 @@ export default function TabLayout() {
       </Animatable.View>
     );
   };
+
+  // Conditionally render Tabs based on isReady and user
+  if (!isReady || !user) {
+    return null; // Or a loading indicator if you prefer
+  }
 
   return (
     <Tabs
