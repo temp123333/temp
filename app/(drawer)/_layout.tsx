@@ -1,8 +1,19 @@
-import React from 'react';
 import { Drawer } from 'expo-router/drawer';
-import { useColorScheme, Platform } from 'react-native';
+import { useColorScheme } from 'react-native';
 import { Chrome as Home, Map, Compass, Bookmark, User } from 'lucide-react-native';
+import * as Animatable from 'react-native-animatable';
 import Colors from '@/constants/Colors';
+import { hp } from '@/utils/responsive';
+import { ROUTES } from '@/constants/routes';
+
+const AnimatedIcon = ({ focused, children }: { focused: boolean; children: React.ReactNode }) => {
+  const animation = focused ? 'pulse' : undefined;
+  return (
+    <Animatable.View animation={animation} duration={500} useNativeDriver>
+      {children}
+    </Animatable.View>
+  );
+};
 
 export default function DrawerLayout() {
   const colorScheme = useColorScheme();
@@ -11,59 +22,72 @@ export default function DrawerLayout() {
   return (
     <Drawer
       screenOptions={{
-        headerStyle: {
-          backgroundColor: theme.background,
-          height: Platform.OS === 'android' ? 70 : 90,
-        },
-        headerTintColor: theme.text,
-        drawerStyle: {
-          backgroundColor: theme.background,
-          width: '80%',
-        },
+        headerShown: false,
         drawerActiveTintColor: theme.tint,
         drawerInactiveTintColor: theme.tabIconDefault,
+        drawerStyle: {
+          backgroundColor: theme.background,
+          paddingTop: hp(2),
+        },
         drawerLabelStyle: {
           fontFamily: 'Poppins-Medium',
-          marginLeft: -20,
+          fontSize: 16,
         },
-        headerTitleStyle: {
-          fontFamily: 'Poppins-SemiBold',
-        }
       }}
     >
       <Drawer.Screen
-        name="index"
+        name={ROUTES.HOME}
         options={{
           title: 'Home',
-          drawerIcon: ({ color, size }) => <Home size={size} color={color} />,
+          drawerIcon: ({ color, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <Home size={22} color={color} />
+            </AnimatedIcon>
+          ),
         }}
       />
       <Drawer.Screen
-        name="discover"
+        name={ROUTES.DISCOVER}
         options={{
           title: 'Discover',
-          drawerIcon: ({ color, size }) => <Compass size={size} color={color} />,
+          drawerIcon: ({ color, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <Compass size={22} color={color} />
+            </AnimatedIcon>
+          ),
         }}
       />
       <Drawer.Screen
-        name="map"
+        name={ROUTES.MAP}
         options={{
           title: 'Map',
-          drawerIcon: ({ color, size }) => <Map size={size} color={color} />,
+          drawerIcon: ({ color, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <Map size={22} color={color} />
+            </AnimatedIcon>
+          ),
         }}
       />
       <Drawer.Screen
-        name="favorites"
+        name={ROUTES.FAVORITES}
         options={{
           title: 'Favorites',
-          drawerIcon: ({ color, size }) => <Bookmark size={size} color={color} />,
+          drawerIcon: ({ color, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <Bookmark size={22} color={color} />
+            </AnimatedIcon>
+          ),
         }}
       />
       <Drawer.Screen
-        name="profile"
+        name={ROUTES.PROFILE}
         options={{
           title: 'Profile',
-          drawerIcon: ({ color, size }) => <User size={size} color={color} />,
+          drawerIcon: ({ color, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <User size={22} color={color} />
+            </AnimatedIcon>
+          ),
         }}
       />
     </Drawer>

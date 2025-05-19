@@ -4,8 +4,9 @@ import { Chrome as Home, Map, Compass, Bookmark, User } from 'lucide-react-nativ
 import * as Animatable from 'react-native-animatable';
 import Colors from '@/constants/Colors';
 import { wp, hp } from '@/utils/responsive';
+import { ROUTES } from '@/constants/routes';
 
-const AnimatedIcon = ({ focused, children }) => {
+const AnimatedIcon = ({ focused, children }: { focused: boolean; children: React.ReactNode }) => {
   const animation = focused ? 'bounceIn' : undefined;
   return (
     <Animatable.View animation={animation} duration={500} useNativeDriver>
@@ -52,7 +53,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name={ROUTES.HOME}
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
@@ -63,7 +64,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="discover"
+        name={ROUTES.DISCOVER}
         options={{
           title: 'Discover',
           tabBarIcon: ({ color, focused }) => (
@@ -74,7 +75,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="map"
+        name={ROUTES.MAP}
         options={{
           title: 'Map',
           tabBarIcon: ({ color, focused }) => (
@@ -85,7 +86,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="favorites"
+        name={ROUTES.FAVORITES}
         options={{
           title: 'Favorites',
           tabBarIcon: ({ color, focused }) => (
@@ -96,7 +97,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name={ROUTES.PROFILE}
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, focused }) => (
