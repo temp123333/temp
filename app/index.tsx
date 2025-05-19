@@ -1,16 +1,17 @@
 import { useEffect } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, useSegments } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Platform } from 'react-native';
 
 export default function Index() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const segments = useSegments();
 
   useEffect(() => {
     if (!isLoading) {
       if (user) {
-        router.replace('/(tabs)/Home');
+        router.replace(Platform.OS === 'ios' ? '/(tabs)/Home' : '/(drawer)/Home');
       } else {
         router.replace('/welcome');
       }
