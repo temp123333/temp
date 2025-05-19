@@ -1,3 +1,4 @@
+import React from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { useColorScheme } from 'react-native';
 import { Chrome as Home, Map, Compass, Bookmark, User } from 'lucide-react-native';

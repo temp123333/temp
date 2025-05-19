@@ -1,3 +1,4 @@
+import React from 'react';
 import { Tabs } from 'expo-router';
 import { useColorScheme, Platform } from 'react-native';
 import { Chrome as Home, Map, Compass, Bookmark, User } from 'lucide-react-native';
